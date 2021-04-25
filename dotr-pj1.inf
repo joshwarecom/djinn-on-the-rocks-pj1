@@ -1,0 +1,3332 @@
+Zcharacter table + '@{00a7}';
+!% -~S
+!% $OMIT_UNUSED_ROUTINES=1
+! The very first lines of the main source code file for a game can contain compiler options, like the two lines above.
+! -~S disables strict error checking. This is otherwise used in z5 and z8 games by default. While useful for debugging,
+!   it adds ~10 KB to the story file size and it makes the game slower.
+! $OMIT_UNUSED_ROUTINES=1 makes the compiler remove all routines which aren't used. This can save some space.
+
+Constant Story      "Djinn on the Rocks"; ! Change!
+Constant Headline   "^A PunyJam #1 game by Joshua Wilson^"; ! Change if you like
+
+! Uncomment ONE of the two following lines, to show either time or score/turns
+! Leaving both commented out makes the library bigger.
+!constant STATUSLINE_TIME; Statusline time;
+Constant STATUSLINE_SCORE; Statusline score;
+
+! Uncomment to not keep track of score
+! The value is what will be shown as the score on statusline in z3
+!Constant NO_SCORE = 0;
+! Uncomment to add optional features to PunyInform
+!Constant DEBUG;
+!Constant DEBUG_SCOPE;
+!Constant CUSTOM_ABBREVIATIONS;
+Constant OPTIONAL_NO_DARKNESS;
+!Constant OPTIONAL_ALLOW_WRITTEN_NUMBERS;
+!Constant OPTIONAL_EXTENDED_METAVERBS;
+!Constant OPTIONAL_EXTENDED_VERBSET;
+!Constant OPTIONAL_PRINT_SCENERY_CONTENTS;
+!Constant OPTIONAL_SCORED;
+Constant OPTIONAL_FULL_SCORE; ! Comment out NO_SCORE when uncommenting this
+!Constant OPTIONAL_FULL_DIRECTIONS;
+Constant OPTIONAL_SIMPLE_DOORS;
+!Constant OPTIONAL_SHIP_DIRECTIONS;
+!Constant OPTIONAL_GUESS_MISSING_NOUN;
+!Constant OPTIONAL_MANUAL_SCOPE;
+!Constant OPTIONAL_MANUAL_REACTIVE;
+!Constant OPTIONAL_ORDERED_TIMERS;
+Constant OPTIONAL_PROVIDE_UNDO;
+!Constant OPTIONAL_REACTIVE_PARSE_NAME;
+!Constant RUNTIME_ERRORS = 0; ! 0, 1 or 2. 0 = smallest file, 2 = most info
+
+! Define any library constants you need here, like MAX_SCORE, AMUSING_PROVIDED,
+! MAX_CARRIED, SACK_OBJECT,  etc.
+
+Constant INITIAL_LOCATION_VALUE = BroomCloset;
+
+Constant AMUSING_PROVIDED;
+Constant MAX_SCORE = 28;
+Constant TASKS_PROVIDED;
+Constant NUMBER_TASKS = 28;
+Array task_scores -> 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0;
+
+Constant TASK_HEAR_CONCH = 0;
+Constant TASK_WAKE_CONCH = 1;
+Constant TASK_TALK_TO_CONCH = 2;
+Constant TASK_APPRAISE_SELF = 3;
+Constant TASK_APPRAISE_CONCH = 4;
+Constant TASK_CURSE_SELF = 5;
+Constant TASK_CURSE_CONCH = 6;
+Constant TASK_PUSH_CORK = 23;
+Constant TASK_ESCAPE_BOTTLE = 7;
+Constant TASK_GET_BOTTLE = 8;
+Constant TASK_READ_NOTE = 9;
+Constant TASK_APPRAISE_CLOSET_DOOR = 10;
+Constant TASK_CURSE_CLOSET_DOOR = 11;
+Constant TASK_APPRAISE_JAMES = 12;
+Constant TASK_CURSE_JAMES = 25;
+Constant TASK_SWAPPED_HERRING = 22;
+Constant TASK_INTERACT_PUPPY = 15;
+Constant TASK_CURSE_PUPPY = 16;
+Constant TASK_OBTAIN_PUPPY = 17;
+Constant TASK_APPRAISE_CHILD = 13;
+Constant TASK_CURSE_CHILD = 14;
+Constant TASK_GIVE_PUPPY = 18;
+Constant TASK_APPRAISE_OFFICE_DOOR = 19;
+Constant TASK_CURSE_OFFICE_DOOR = 20;
+Constant TASK_SWAP_DOORS = 21;
+Constant TASK_USE_COMPUTER = 27;
+Constant TASK_ENTRAP_VICTIM = 26;
+Constant TASK_GIVE_RICHNESS_TO_JAMES = 24;
+
+Constant MSG_TAKE_YOURSELF "Unfortunately, you are not yours to take.  You belong to James Merl III.  It's enough to drive a Djinn to gin, eh? Eh? Eh.";
+
+Include "globals.h";
+
+! Define your own global variables here, if any
+Constant KARMATASKS_PROVIDED;
+Constant MAX_KARMA = 100;
+Constant MIN_KARMA = -100;
+Constant NUMBER_KARMATASKS = 9;
+Array karmatask_scores -> 1 1 4 1 2 2 2 3 3 0;
+Constant KARMATASK_PET_PUPPY = 0;
+Constant KARMATASK_RESCUE_PUPPY = 1;
+Constant KARMATASK_PAY_BOY = 2;
+Constant KARMATASK_DISPOSE_HERRING = 3;
+Constant KARMATASK_HARM_PUPPY = 4;
+Constant KARMATASK_SELL_PUPPY = 5;
+Constant KARMATASK_ENTRAP_INNOCENT = 6;
+Constant KARMATASK_TRANSMOGRIFY_PUPPY = 7;
+Constant KARMATASK_STOLE_BACK_MONEY = 8;
+Array  karmatask_done -> NUMBER_KARMATASKS;
+
+!FIXME couldn't get arbitrary scores in the array to work for negative values, ergo hack
+[ AchievedKarma num;
+    if (karmatask_done->num == 0) {
+        karmatask_done->num = 1;
+        if (karmatask_scores->num == 1) {
+       		karma = karma + 25;
+       	}
+       	else if (karmatask_scores->num == 2) {
+          karma = karma - 25;
+       	}
+       	else if (karmatask_scores->num == 3) {
+    			karma = karma - 50;
+       	}
+        else if (karmatask_scores->num == 4) {
+    			karma = karma + 50;
+       	}
+    }
+];
+
+Constant SIZE_SMALL 1;
+Constant SIZE_MEDIUM 2;
+Constant SIZE_LARGE 3;
+Constant SIZE_MASSIVE 4;
+
+Constant COMPOSED_MALLEABLE 1;
+Constant COMPOSED_SOLID 2;
+Constant COMPOSED_HEFTY 3;
+Constant COMPOSED_COMPLEX 4;
+
+Constant MATERIAL_ANIMAL 1;
+Constant MATERIAL_VEGETABLE 2;
+Constant MATERIAL_METAL 3;
+Constant MATERIAL_GLASS 4;
+Constant MATERIAL_ARCANE 5;
+Constant MATERIAL_CHEMICALS 6;
+
+! Define the entry point routines you need here, like Amusing, DarkToDark etc.
+[Amusing;
+  print "^There are six ways to win the game! Can you find them all?^";
+  print "- Karma Victory at +100 or -100! Hint - you can swap the puppy back after giving it away...^";
+  print "- Perhaps it's time for someone else to take their turn in the bottle^";
+  print "- There's more than one way to make a man rich^";
+  print "Good luck, enjoy, and thank you for playing!^";
+];
+[DisallowTakeAnimate;
+	if (noun == Conch) rfalse;
+];
+
+Attribute cursed;
+Attribute is_djinn;
+!FIXME find a more efficient way to keep all cursed objects in scope for swapping
+[ InScope person i;
+	if (person == player && player.justswapped == 0) {
+    if (action == ##Swap) {
+  		objectloop (i has cursed) {
+  			PlaceInScope(i);
+  		}
+    }
+	}
+	rfalse;
+];
+
+[ PrintTaskName task_number;
+	switch (task_number) {
+    TASK_HEAR_CONCH: "Listened to the conch shell? CHECK!";
+    TASK_WAKE_CONCH: "Woke the sleeping conch? CHECK!";
+    TASK_TALK_TO_CONCH: "Spoke to Enzo? CHECK!";
+    TASK_APPRAISE_SELF: "Appraised your beautiful self? CHECK!";
+    TASK_APPRAISE_CONCH: "Appraised your beautiful conch shell? CHECK!";
+    TASK_CURSE_SELF: "Cursed yourself? CHECK!";
+    TASK_CURSE_CONCH: "Cursed the conch shell? CHECK!";
+    TASK_ESCAPE_BOTTLE: "Escaped the bottle? CHECK!";
+    TASK_GET_BOTTLE: "Obtained the bottle? CHECK!";
+    TASK_READ_NOTE: "Read the impudent note? CHECK!";
+    TASK_APPRAISE_CLOSET_DOOR: "Appraised the beautiful closet door? CHECK!";
+    TASK_CURSE_CLOSET_DOOR: "Cursed the closet door? CHECK!";
+    TASK_APPRAISE_JAMES: "Appraised the beautiful James Merl III? CHECK!";
+    TASK_APPRAISE_CHILD: "Appraised the young boy? CHECK!";
+    TASK_CURSE_CHILD: "Cursed the young boy? CHECK!";
+    TASK_INTERACT_PUPPY: "Interacted with the puppy? CHECK!";
+    TASK_CURSE_PUPPY: "Cursed the puppy? CHECK!";
+    TASK_OBTAIN_PUPPY: "Obtained the puppy? CHECK!";
+    TASK_GIVE_PUPPY: "Disposed of the puppy? CHECK!";
+    TASK_APPRAISE_OFFICE_DOOR: "Appraised the stately office door? CHECK!";
+    TASK_CURSE_OFFICE_DOOR: "Cursed the office door? CHECK!";
+    TASK_SWAP_DOORS: "Swapped the doors like a boss? CHECK!";
+    TASK_SWAPPED_HERRING: "Obtained the red herring? CHECK!";
+    TASK_PUSH_CORK: "Dislodged the cork? CHECK!";
+    TASK_GIVE_RICHNESS_TO_JAMES: "Made James RICH? CHECK!";
+    TASK_CURSE_JAMES: "Cursed James Merl III? CHECK!";
+    TASK_ENTRAP_VICTIM: "Put someone else in the bottle? CHECK!";
+    TASK_USE_COMPUTER: "Used the computer? CHECK!";
+	}
+];
+
+
+[ PrintKarmaTaskName task_number;
+	switch (task_number) {
+    KARMATASK_PET_PUPPY: "You were kind to the puppy!";
+    KARMATASK_RESCUE_PUPPY: "You rescued the puppy!";
+    KARMATASK_PAY_BOY: "You gave money to the boy!";
+    KARMATASK_DISPOSE_HERRING: "You disposed of trash properly!";
+    KARMATASK_HARM_PUPPY: "You were cruel to the puppy!";
+    KARMATASK_SELL_PUPPY: "You sold the puppy!";
+    KARMATASK_TRANSMOGRIFY_PUPPY: "You transmogrified the puppy!";
+    KARMATASK_ENTRAP_INNOCENT: "You entrapped an innocent bystander!";
+    KARMATASK_STOLE_BACK_MONEY: "You stole money from the boy!";
+	}
+];
+
+!Uncomment to add PunyLib extensions
+!Include "ext_menu.h";
+!Include "ext_flags.h";
+! ====================================
+! Setup quote box
+! ====================================
+Constant QUOTE_V3_SCREEN_WIDTH 40;
+Include "ext_quote_box.h";
+
+Array note_text static --> 13 38
+"If you can read this, you have escaped"
+"from your bottle again.  I hope this  "
+"means you are ready to finally grant  "
+"my wish and make me rich.  If no, then "
+"GET BACK IN THAT BOTTLE OR SO HELP ME "
+"I WILL CARVE A SEAL OF SOLOMON SO FAR "
+"UP YOUR COLON THAT YOU'LL BE COUGHING "
+"ANCIENT WISDOM FOR A WEEK!            "
+""
+"             - your pal James Merl III"
+""
+""
+"      [press a key to continue]       ";
+
+Array pc_screen static --> 4 38
+""
+"   CONNECTING TO NAME CHANGE OFFICE   "
+"       PRESS A KEY TO CONTINUE        "
+"";
+
+Array pc_screen2 static --> 4 38
+""
+" DISCONNECTED FROM NAME CHANGE OFFICE "
+"       PRESS A KEY TO CONTINUE        "
+"";
+
+Array pc_screen3 static --> 4 38
+""
+"     UNAUTHORIZED USER DETECTED!      "
+"         PRESS A KEY TO EXIT          "
+"";
+
+
+Array cheque_text static --> 6 38
+""
+"PAY TO THE ORDER OF: CASH             "
+"VALUE:               @{00a7}100,000.00      "
+"ACCOUNT NUMBER:      CD001200124      "
+""
+"      [press a key to continue]       "
+"";
+
+!Include "ext_cheap_scenery.h";
+
+Include "puny.h";
+
+! Uncomment to add PunyLib extensions
+!Include "ext_waittime.h";
+
+!Routines
+
+[Ascension _loc;
+  _loc = location;
+  if (karma >= 100) {
+    player.ascended = 1;
+  	print "^Angelic music fills your ears and you feel yourself being swept up and away from your home on earth to the far side of the universe.  You come to rest cradled in the arms of the Spirit of Good.^^";
+    PlayerTo(FarSide);
+  	print "'I have been watching you, my child, and I am pleased.  I offer to grant your owner's wish and usher you to a higher plane of existence.  I will give him not the riches of the world, but of the mind and soul.  Wisdom.  Patience.  Inner peace.  Do you accept this boon?'^^";
+    _UpdateScoreOrTime();
+    DrawStatusLine();
+  	if (YesOrNo()) {
+  		print "^The Spirit smiles.  With an effortless gesture of her first and ninth hands, she grants James' wish and the deed is done.  'Take your place at my side.  There is much more for you to do.'^^";
+  		deadflag = 2;
+  	}
+  	else {
+  		print "'Very well.  Perhaps we will meet again in your next life, but for now, I shall return you home.'  The vision fades and you find yourself back where you were before.^^";
+  	}
+  }
+  else if (karma <= -100) {
+    player.ascended = 1;
+    print "^You hear the roar of thunder and the rush of a blazing fire, and you are suddenly caught away to the far side of the universe.  The Spirit of Evil himself greets you with a menacing grin.^^";
+    PlayerTo(FarSide);
+  	print "'Well well well...someone has been a Bad Little Djinn.  And I like it! I want you to come work for me.  First, we need to close out your old contract.  What say I make our friend James rich for you? So rich that it destroys him! He'll never know a moment's peace.  Never know love! Only insatiable lust for his wealth, and the fear of losing it! How does that sound?'^^";
+    _UpdateScoreOrTime();
+    DrawStatusLine();
+  	if (YesOrNo()) {
+  		print "^'Ha! You and I are going to get along just fine my friend.' With a flick of his forked tail, the deed is done.  'Now come with me and learn from the master...'^^";
+  		deadflag = 2;
+  	}
+  	else {
+  		print "He is incensed beyond words.  'How dare you waste my precious time? At a time and in a place of my choosing, you shall pay for this you worm!  BE GONE!'.  The vision fades and you find yourself back where you were before.^^";
+  	}
+  }
+  PlayerTo(_loc);
+];
+
+[FreeMe ;
+  player.free = 1;
+  StopDaemon(Conch);
+  give Conch ~proper;
+  Conch.short_name = "conch shell";
+  remove(EtherealChain);
+  remove(Bottle);
+  print "You feel a sudden lightness in your head.  Your ethereal chain evaporates, and the bottle vanishes into nothingness with a mildly pained squeal.^";
+];
+
+[ItemIsNotBlockedByBottle silent obj;
+  if (obj);
+  else {
+    obj = self;
+  }
+	if (actor in Bottle) {
+		if (obj notin Bottle && obj notin actor) {
+			if (silent) {
+			}
+			else {
+				print "Perhaps you could interact with ", (the) obj, " if you weren't crammed so tightly into your enchanted bottle.";
+        if (player.blocked_wit == 0) {
+          player.blocked_wit = 1;
+          print "  Consider availing yourself of more roomy (and less carniverous) accomodations.";
+        }
+        print "^";
+			}
+			rfalse;
+		}
+	}
+	rtrue;
+];
+[ActorIsNotBlockedByBottle silent;
+	if (actor in Bottle) {
+		if (silent) {
+		}
+		else {
+			print "There isn't enough room with you in the bottle to freely drop ", (the) self, ".^";
+		}
+		rfalse;
+	}
+	rtrue;
+];
+
+[MsgExaminedFromAfar obj;
+	print "You can't see ", (the)obj, " very well from here.";
+  if (player.x_wit == 0) {
+    player.x_wit = 1;
+    "  Being squeezed into a magic Djinn-eating bottle yields very few convenient viewing angles.";
+  }
+  "";
+];
+
+!Classes
+Class Djinn
+	with
+		size SIZE_LARGE,
+		material MATERIAL_ANIMAL,
+		composition COMPOSED_COMPLEX,
+    x_wit 0,
+    swap_wit 0,
+    curse_wit 0,
+    uncurseme_wit 0,
+    uncurse_wit 0,
+    blocked_wit 0,
+    justswapped 0;
+
+Class MaterialThing
+	with
+		size -1,
+		material -1,
+		composition -1,
+    swapme 0,
+		before [;
+			Examine:
+				if (ItemIsNotBlockedByBottle(1) == false) {
+					MsgExaminedFromAfar(self);
+					rtrue;
+				}
+			Drop:
+				if (ActorIsNotBlockedByBottle() == false) {
+					rtrue;
+				}
+      Swap:;
+			default:
+				if (ItemIsNotBlockedByBottle() == false) rtrue;
+		];
+
+!Verbs
+[ ScreamSub;
+	if (noun) {
+		if (noun == player) {
+			print_ret "You scream yourself hoarse.  Well done.";
+		}
+		else if (noun has animate)
+			print_ret (The) noun, " appears unmoved.";
+		else
+			print_ret (The) noun, " is about as responsive as you would expect.";
+	}
+	else {
+		"Temper, temper.";
+	}
+];
+
+Extend only 'shout' replace
+	* -> Scream
+	* 'to' noun -> Scream
+	* 'at' noun -> Scream;
+Verb 'yell' 'scream' = 'shout';
+Verb 'kick' 'bang' 'shake' 'stab' 'choke' 'slash' = 'attack';
+
+Extend only 'go' 'enter' last
+  * 'through' door -> Enter;
+
+Verb 'l' = 'look';
+Extend only 'look' 'l' last
+  * noun -> Examine;
+
+[ KnockSub;
+  if ((noun == BroomClosetDoor) || (noun == RecordsOfficeDoor)) {
+    "The door is heavy, which hurts your knuckles.  There is no response, which hurts your pride.";
+  }
+  else {
+    "Knock knock! Who's there? A bad joke. Oh ok, never mind...";
+  }
+];
+
+Verb 'knock'
+  * -> Knock
+  * 'on' noun -> Knock;
+
+[ BlowSub;
+  if (noun == 0) "You huff and you puff and you blow!";
+  else if (noun ~= Conch) {
+    "Who do you think you are? The Big Bad Wolf?";
+  }
+];
+
+Verb 'blow'
+  * -> Blow
+  * noun -> Blow
+  * 'on'/'in'/'at'/'into' noun -> Blow;
+
+[ ModifiedCloseSub;
+  if (noun == Bottle && second == Cork) {
+    <<Close Bottle>>;
+  }
+  else {
+    "",MSG_PARSER_NOSUCHTHING;
+  }
+];
+
+Extend only 'close'
+  * noun 'with' noun -> ModifiedClose;
+Verb 'seal' = 'close';
+
+[ChainSub;
+  print "The chain refuses to assist, rearing back and slapping you painfully across the wrist!^";
+];
+[IsChain;
+  return (noun == EtherealChain);
+];
+Verb 'wrap'
+  * noun=IsChain 'around'/'to' noun -> Chain;
+Extend only 'tie' first
+  * noun=IsChain -> Chain
+  * noun=IsChain 'around'/'to' noun -> Chain;
+
+[ UseSub;
+  if (noun == Computer && second == 0);
+  else {
+    if (noun == knife && second ~= 0) {
+      <<Attack second>>;
+    }
+    print "I'm not sure what you mean by that.^";
+    rfalse;
+  }
+];
+Verb 'use'
+  * noun=IsChain 'on' noun -> Chain
+  * noun=IsChain -> Chain
+  * noun -> Use
+  * noun noun -> Use
+  * noun 'on' noun -> Use;
+
+[ WhistleSub;
+  if (noun == 0) {
+    "You give a little whistle.";
+  }
+  else {
+    "You whistle at ", (the)noun,".";
+  }
+];
+
+Verb 'whistle'
+  * -> Whistle
+  * noun -> Whistle
+  * 'at'/'into' noun -> Whistle;
+
+[ DjinnUnlockSub;
+  if (noun == 0) {
+    "Unlock what exactly?";
+  }
+  else if (second == 0) {
+    "And unlock ", (the)noun, " with what exactly?";
+  }
+  else {
+    if (noun == RecordsOfficeDoor) {
+      "The narrator takes pity and decides to save you a little trouble.  That door is unanswerably un-unlockable.";
+    }
+    else {
+      "Ok.  You give a knowingly doomed, half-hearted attempt to unlock ", (the)noun, " with ", (the)second, ".  And as expected, you fail.  Nice try though.";
+    }
+  }
+];
+Extend 'unlock' replace
+  * -> DjinnUnlock
+  * noun -> DjinnUnlock
+  * noun 'with' noun -> DjinnUnlock;
+
+Extend only 'push' first
+  * 'open'/'on'/'out'/'up' noun -> Push;
+
+[ TalkToSub;
+	if (noun == player) {
+		print_ret "You give yourself a quick pep-talk.  You're doing great!";
+	}
+	else {
+    switch (noun) {
+      James:
+        if (James has on) {
+          print_ret (The) noun, " simply smiles back at you wordlessly.  That's new.";
+        }
+        else print_ret (The) noun, " stares at you coldly but says nothing.  Probably for the best.";
+      default:
+		    print_ret (The) noun, " doesn't seem interested.";
+      }
+	}
+];
+
+Verb 'talk'
+	* 'to'/'in'/'at' creature -> TalkTo;
+Extend 'speak'
+	* 'to'/'in'/'at' creature -> TalkTo;
+
+[ PokeSub;
+  if (noun has animate) {
+    "Miss Manners would not be pleased at such impertinence.";
+  }
+	"You prod ", (the)noun, " contemptously.";
+];
+Verb 'poke'
+	* noun -> Poke;
+Verb 'prod' = 'poke';
+
+[SwapMsg;
+  print "Tugging gently at the threads of material reality, you deftly induce ", (the)noun, " to change places with ", (the)second, ".  ";
+];
+
+[ SwapSub t1 t2 player_moved other_obj origional_player_location original_obj_location _i _nounMsg _secondMsg;
+  _nounMsg = "";
+  _secondMsg = "";
+
+  if (actor provides free) {
+    if (actor.free == 1) {
+      "You try but fail.  This is great news! It means that you are no longer a Djinn! You may TAKE SELF to complete the ritual of self possession.";
+    }
+  }
+	if (noun == Bottle || second == Bottle) {
+		print (The) Bottle, " glowers indignantly at you and remains exactly where it was.  Good thinking though - it was worth a shot.";
+    rtrue;
+	}
+	else {
+		if (noun has cursed) {
+			if (second has cursed) {
+				if (noun == second) {
+					"No thanks.  The last time you tried a trick like that, you turned a hamster inside out.";
+				}
+
+        if (noun provides size && noun provides composition && noun provides material);
+        else "You're not sure why, but the laws of magic prevent your attempt to swap ", (the)noun,".";
+
+        if (second provides size && second provides composition && second provides material);
+        else "You're not sure why, but the laws of magic prevent your attempt to swap ", (the)second,".";
+
+        if (noun.size ~= second.size || noun.material ~= second.material || noun.composition ~= second.composition) {
+          if (actor.swap_wit == 0) {
+            actor.swap_wit = 1;
+            print "What madness is this? ";
+          }
+          print "You cannot swap something ";
+          print (string)GetThingSize(noun),", ";
+          print (string)GetThingComposition(noun),", ";
+          print "and made mostly of ";
+          print (string)GetThingMaterial(noun)," with something ";
+          print (string)GetThingSize(second),", ";
+          print (string)GetThingComposition(second),", ";
+          print "and made mostly of ";
+          print (string)GetThingMaterial(second),".^";
+          rfalse;
+        }
+        else if ((noun == BroomClosetDoor && second == RecordsOfficeDoor) || (second == BroomClosetDoor && noun == RecordsOfficeDoor)) {
+          !special case, swapping the swapdoors()
+          noun.swapme = 1;
+          second.swapme = 1;
+          SwapDoors();
+          Achieved(TASK_SWAP_DOORS);
+          SwapMsg();
+          if (TestScope(player,noun)) print (string)_nounMsg;
+          if (TestScope(player,second)) print (string)_secondMsg;
+          print "^";
+        }
+				else {
+          if (noun == RedHerring || second == RedHerring) {
+            if (RedHerring hasnt moved) {
+              give RedHerring ~scenery;
+              give RedHerring moved;
+              if (noun == Knife) {
+                _nounMsg = "The knife hangs in the air above the broom closet door for a moment and then clatters to the floor.";
+              }
+              if (second == Knife) {
+                _secondMsg = "The knife hangs in the air above the broom closet door for a moment and then clatters to the floor.";
+              }
+            }
+          }
+          else if ((noun == Child || noun == James) && (second == Child || second == James)) {
+            if (James in Pub && Child in Pub) {
+              _nounMsg = "He roughly shoos the boy out from behind the bar and returns to his rightful place there.";
+            }
+          }
+
+          origional_player_location = parent(player);
+
+          if (noun == player) {
+            original_obj_location = parent(second);
+          }
+          else {
+            original_obj_location = parent(noun);
+          }
+
+          if (original_obj_location == Bottle) {
+            if (Bottle in player) {
+              if (noun == player || second == player) {
+                "No.  That would qualify as an Act of Poor Judgement and your insurance does't cover those.  If you swap yourself into a bottle that you are currently holding, it might fall and shatter with you in it!";
+              }
+            }
+          }
+
+          SwapMsg();
+          if (TestScope(player,noun)) print (string)_nounMsg;
+          if (TestScope(player,second)) print (string)_secondMsg;
+          print "^";
+
+          if (second in noun) {
+            noun.swapme = 1;
+            second.swapme = 1;
+						t2 = parent(parent(second));
+            if (second == player) {
+              player_moved = 1;
+              print "^";
+              PlayerTo(t2);
+              other_obj = noun;
+            }
+						else move second to t2;
+            if (noun == player) {
+              player_moved = 1;
+              print "^";
+              PlayerTo(second);
+              other_obj = second;
+            }
+						else move noun to second;
+					}
+					else if (noun in second) {
+            noun.swapme = 1;
+            second.swapme = 1;
+						t1 = parent(parent(noun));
+            if (noun == player) {
+              player_moved = 1;
+              print "^";
+              PlayerTo(t1);
+              other_obj = second;
+            }
+						else move noun to t1;
+            if (second == player) {
+              player_moved = 1;
+              print "^";
+              PlayerTo(noun);
+              other_obj = noun;
+            }
+						else move second to noun;
+					}
+					else {
+            noun.swapme = 1;
+            second.swapme = 1;
+						t1 = parent(noun);
+						t2 = parent(second);
+            if (noun == player) {
+              move second to t1;
+              player_moved = 1;
+              print "^";
+              PlayerTo(t2);
+              other_obj = second;
+            }
+            else if (second == player) {
+              move noun to t2;
+              player_moved = 1;
+              print "^";
+              PlayerTo(t1);
+              other_obj = noun;
+            }
+            else {
+  						move noun to t2;
+  						move second to t1;
+            }
+					}
+          if (player_moved == 1) {
+            if (Bottle notin player) {
+              if (Bottle notin parent(player)) {
+                if (player notin Bottle) {
+                  if (TestScope(player,Bottle));
+                  else {
+                    _i = 0;
+                    print "^Wait...you feel a tightening sensation around your ankle and hear a nearby rumble.  You're too far away from your bottle! With a chaotic flash, everything springs back to where it was.^^";
+                    print "[Press a key to continue.]^";
+                    @read_char _i;
+                    print "^";
+                    move other_obj to original_obj_location;
+                    PlayerTo(origional_player_location);
+                    _i = -1;
+                  }
+                }
+              }
+              if (Child in Bottle) {
+                AchievedKarma(KARMATASK_ENTRAP_INNOCENT);
+                Child.&name-->0 = 'horrified';
+                Child.short_name = "horrified young boy";
+                give Child on;
+              }
+            }
+            if (_i == 0) {
+              if (James in Bottle) {
+                Achieved(TASK_ENTRAP_VICTIM);
+              }
+              else if (Child in Bottle) {
+                Achieved(TASK_ENTRAP_VICTIM);
+                AchievedKarma(KARMATASK_ENTRAP_INNOCENT);
+                Child.&name-->0 = 'horrified';
+                Child.short_name = "horrified young boy";
+                give Child on;
+              }
+            }
+          }
+          else {
+            if (Puppy in player) {
+              Achieved(TASK_OBTAIN_PUPPY);
+            }
+            if (Conch in Child) {
+              AchievedKarma(KARMATASK_TRANSMOGRIFY_PUPPY);
+              Child.&name-->0 = 'horrified';
+              Child.short_name = "horrified young boy";
+              give Child on;
+            }
+            if (Note in Child) {
+              AchievedKarma(KARMATASK_STOLE_BACK_MONEY);
+              Child.&name-->0 = 'horrified';
+              Child.short_name = "horrified young boy";
+              give Child on;
+            }
+            if (Conch in Malicia) {
+              give Malicia on;
+            }
+            if (RedHerring in player) {
+              Achieved(TASK_SWAPPED_HERRING);
+            }
+            if (James in Bottle) {
+              Achieved(TASK_ENTRAP_VICTIM);
+            }
+            if (Child in Bottle) {
+              Achieved(TASK_ENTRAP_VICTIM);
+              AchievedKarma(KARMATASK_ENTRAP_INNOCENT);
+              Child.&name-->0 = 'horrified';
+              Child.short_name = "horrified young boy";
+              give Child on;
+            }
+          }
+				}
+			}
+			else {
+        if (second == player) print "You";
+        else print (The) second;
+        print " must be cursed first!^";
+      }
+		}
+		else {
+      if (noun == player) print "You";
+      else print (The) noun;
+      print " must be cursed first!^";
+    }
+	}
+  player.justswapped = 1;
+  rfalse;
+];
+
+[ OpenRoutine _dirMsg;
+  self.short_name = 0;
+  switch (parent(self)) {
+    BroomCloset: _dirMsg = " to the east";
+    Pub: _dirMsg = " to the west";
+    MainStreet: _dirMsg = " to the south";
+    RecordsOffice: _dirMsg = " to the north";
+  }
+  if(self in BroomCloset) {
+    "", (The)self, " looks a little out of place here.  It is open", (string)_dirMsg,".";
+  }
+  else {
+    print (The)self, " looks a little out of place here.  It is open", (string)_dirMsg,".";
+    if (RedHerring hasnt moved && self in Pub) {
+      "A cast iron red herring hangs above it.";
+    }
+    else {
+      "";
+    }
+  }
+];
+[ CloseRoutine;
+  self.short_name = 0;
+  if(self in BroomCloset) {
+    print (The)self, " looks a little out of place here.  It is closed to the east.";
+  }
+  else {
+    print (The)self, " looks a little out of place here.  It is closed";
+    switch (parent(self)) {
+      Pub: print " to the west";
+      MainStreet: print " to the south";
+      RecordsOffice: print " to the north";
+    }
+    print ".";
+    if (RedHerring hasnt moved && self in Pub) {
+      "  A cast iron red herring hangs above it.";
+    }
+    else {
+      "";
+    }
+  }
+];
+
+Verb 'swap'
+	* noun 'with'/'for'/'and' noun -> Swap;
+
+[ WakeSub;
+	if (noun == player) {
+		"You pinch yourself.  Ow.";
+	}
+	print_ret (The)noun, " isn't asleep at the moment.";
+];
+
+[ KissSub;
+	print_ret "This game features a very small amount of that, but not here.";
+];
+Verb 'kiss'
+	* creature -> Kiss;
+
+[ PetSub;
+  KissSub();
+];
+Verb 'pet'
+	* creature -> Pet;
+
+[ StrokeSub;
+  KissSub();
+];
+Verb 'Stroke'
+	* creature -> Stroke;
+
+[ ScratchSub;
+  KissSub();
+];
+Verb 'scratch'
+	* creature -> scratch;
+
+
+
+
+Verb 'wake'
+	* creature -> Wake;
+
+[ GetThingSize obj;
+  if (obj provides size)
+    switch (obj.size) {
+      SIZE_SMALL: return "small";
+      SIZE_MEDIUM: return "medium sized";
+      SIZE_LARGE: return "large";
+      SIZE_MASSIVE: return "massive";
+      default:
+        return "curiously unsizeable";
+    }
+  else return "curiously unmeasurable";
+];
+
+[ GetThingComposition obj;
+  if (obj provides composition)
+    switch (obj.composition) {
+      COMPOSED_MALLEABLE: return "malleable";
+      COMPOSED_SOLID: return "solid";
+      COMPOSED_HEFTY: return "dense";
+      COMPOSED_COMPLEX: return "with complex components";
+      default:
+        return "with that certain je ne sais quoi";
+    }
+  else return "confusingly constructed";
+];
+
+[ GetThingMaterial obj;
+  if (obj provides material)
+    switch (obj.material) {
+      MATERIAL_ANIMAL: return "animal flesh";
+      MATERIAL_VEGETABLE: return "vegetable matter";
+      MATERIAL_METAL: return "metal";
+      MATERIAL_GLASS: return "glass";
+      MATERIAL_ARCANE: return "arcanoplasm";
+      MATERIAL_CHEMICALS: return "random woods, plastics, fibres, and chemicals";
+      default:
+        return "the stuff of dreams";
+    }
+  else return "the stuff of nightmares";
+];
+
+[ HeSheItThey obj;
+	if (obj == player)			 { print "you"; return; }
+	if (obj has pluralname)		{ print "they"; return; }
+	if (obj has animate) {
+		if (obj has female)		{ print "she"; return; }
+		else if (obj hasnt neuter) { print "he"; return; }
+	}
+	print "it";
+];
+
+[ AppraiseSub;
+  if (actor provides free) {
+    if (actor.free == 1) {
+      "You try but fail.  This is great news! It means that you are no longer a Djinn! You may TAKE SELF to complete the ritual of self possession.";
+    }
+  }
+  if (noun ofclass MaterialThing || noun == player) {
+    if (noun == player) {
+      print "Crossing your eyes intently, you study yourself from nose to toes, carefully concluding that you are ";
+    }
+    else {
+      print "Studying ", (the) noun, " carefully, you conclude that ";
+      HeSheItThey(noun);
+      print " ";
+      IsOrAre(noun);
+      print " ";
+    }
+    print (string)GetThingSize(noun),", ";
+    print (string)GetThingComposition(noun),", ";
+    print "and made mostly of ";
+    print (string)GetThingMaterial(noun),".  ";
+
+    if (noun has cursed) {
+      if (noun == player) {
+        print "Additionally, you are currently emitting a jaundiced glow - a sure sign that a curse is doing its mysterious work.";
+      }
+      else {
+        print "Additionally, ", (the)noun, " emit";
+        if (noun hasnt pluralname) print "s";
+        print " a jaundiced glow - a sure sign that a curse is at work.";
+      }
+    }
+
+    if (noun == player) {
+      Achieved(TASK_APPRAISE_SELF);
+    }
+    else if (noun == Conch) {
+      Achieved(TASK_APPRAISE_CONCH);
+    }
+    else if (noun == BroomClosetDoor) {
+      Achieved(TASK_APPRAISE_CLOSET_DOOR);
+    }
+    else if (noun == RecordsOfficeDoor) {
+      Achieved(TASK_APPRAISE_OFFICE_DOOR);
+    }
+    else if (noun == James) {
+      Achieved(TASK_APPRAISE_JAMES);
+    }
+    else if (noun == Child) {
+      Achieved(TASK_APPRAISE_CHILD);
+    }
+
+    print "^";
+    AfterRoutines();
+  }
+  else {
+    if (noun == Bottle) {
+      "As you gaze deeply at ", (the) noun, ", gazes deeply into you.  You get the feeling it is you yourself being appraised! You blush and leave ", (the)noun, " alone.";
+    }
+    else {
+      print (The) noun, " appears to have been claimed by another Djinn! You may not CURSE, SWAP, or APPRAISE ";
+      ItorThem(noun);
+      print " any further.^";
+    }
+  }
+];
+
+Verb 'appraise'
+	* noun -> Appraise;
+
+
+[ CurseSub;
+  if (noun ofclass MaterialThing || noun == player) {
+    if (actor provides free) {
+      if (actor.free == 1) {
+        "You try but fail.  This is great news! It means that you are no longer a Djinn! You may TAKE SELF to complete the ritual of self possession.";
+      }
+    }
+    if (noun has cursed) {
+      if (noun == player) {
+        print "You are already cursed.";
+        if (player.curse_wit == 0) {
+          player.curse_wit = 1;
+          print "  There's no such thing as extra cursed.";
+        }
+      }
+      else {
+        print (The)noun, " is already cursed.";
+        if (player.curse_wit == 0) {
+          player.curse_wit = 1;
+          print "  There's no such thing as extra cursed.";
+        }
+      }
+    }
+    else {
+      BeforeRoutines();
+      give noun cursed;
+      if (noun == player) {
+        print "You focus your attention inward, guiding the curse to bloom and take root.";
+        Achieved(TASK_CURSE_SELF);
+      }
+      else {
+        print "You focus your attention on ", (the)noun, ", guiding the curse to take root and bloom deep within.";
+        if (noun == CONCH) {
+          Achieved(TASK_CURSE_CONCH);
+        }
+        else if (noun == BroomClosetDoor) {
+          Achieved(TASK_CURSE_CLOSET_DOOR);
+        }
+        else if (noun == RecordsOfficeDoor) {
+          Achieved(TASK_CURSE_OFFICE_DOOR);
+        }
+        else if (noun == James) {
+          Achieved(TASK_CURSE_JAMES);
+        }
+        else if (noun == Child) {
+          Achieved(TASK_CURSE_CHILD);
+        }
+        else if (noun == Puppy) {
+          Achieved(TASK_CURSE_PUPPY);
+        }
+
+      }
+    }
+    print "^";
+    AfterRoutines();
+  }
+  else {
+    if (noun == Bottle) {
+      "", (The) noun, " snarls at you dismissively and the curse does not take hold.  Enchanted bottles are usually immune to this sort of thing.";
+    }
+    else {
+      if (ADirection(noun)) {
+        print "Directional cursing and swapping is taboo these days.  It usually results in mass extinctions, and that means a ton of paperwork for the Djinns involved.^";
+      }
+      else {
+        print (The) noun, " appears to have been claimed by another Djinn! You may not CURSE, SWAP, or APPRAISE ";
+        ItorThem(noun);
+        print " any further.^";
+      }
+    }
+  }
+];
+
+Verb 'curse'
+	* noun -> Curse;
+
+[ UncurseSub;
+  if (actor provides free) {
+    if (actor.free == 1) {
+      "You try but fail.  This is great news! It means that you are no longer a Djinn! You may TAKE SELF to complete the ritual of self possession.";
+    }
+  }
+  if (noun ofclass MaterialThing || noun == player) {
+    if (noun hasnt cursed) {
+      if (noun == player) {
+        print "You are not already cursed.";
+        if (player.curse_wit == 0) {
+          player.curse_wit = 1;
+          print "  There's no such thing as extra cursed.";
+        }
+      }
+      else {
+        print (The)noun, " is not already cursed.";
+        if (player.curse_wit == 0) {
+          player.curse_wit = 1;
+          print "  There's no such thing as extra cursed.";
+        }
+      }
+    }
+    else {
+      give noun ~cursed;
+      if (noun == player) {
+        print "You focus your attention inward and you feel the curse dissipate.";
+        if (player.uncurseme_wit == 0) {
+          player.uncurseme_wit = 1;
+          print "  It's about time too - that curse was starting to get itchy.";
+        }
+      }
+      else {
+        print "You focus your attention on ", (the)noun, ", guiding the curse to shrink and fade away.";
+        if (player.uncurse_wit == 0) {
+          player.uncurse_wit = 1;
+          print "  It's as they say - all cursed things must come to an end.  Or something like that.";
+        }
+      }
+    }
+    print "^";
+    AfterRoutines();
+  }
+  else {
+    if (noun == Bottle) {
+      "", (The) noun, " smirks as if to say 'As if!'  Enchanted bottles aren't generally curseable in the first place.";
+    }
+    else {
+      "", (The) noun, " appears to have been claimed by another Djinn! You may not disturb any curses on it.";
+    }
+  }
+];
+
+Verb 'uncurse'
+	* noun -> Uncurse;
+
+
+[ QueryEnzoSub;
+	if ((parent(Conch) == parent(player)) || parent(Conch) == player) {
+		AskEnzo(noun);
+	}
+	else {
+    if (TestScope(player,Conch) == true) {
+      if (ItemIsNotBlockedByBottle(false, Conch) == false) rtrue;
+    }
+		"You don't see them here.";
+	}
+];
+
+[ QueryJamesSub;
+	if ((parent(James) == parent(player))) {
+    if (CompareStrings(actualNewName,givenName) == false) {
+      "James who? Who are you referring to? That person does not exist.";
+    }
+    else
+		  AskJames(noun);
+	}
+	else {
+    if (TestScope(player,James) == true) {
+      if (ItemIsNotBlockedByBottle(false, James) == false) rtrue;
+    }
+		"You don't see them here.";
+	}
+];
+
+[ QueryRichSub;
+  if (CompareStrings(actualNewName,richName)) {
+    QueryJamesSub();
+  }
+  else {
+    "Rich who? Who are you referring to? That person does not exist.";
+  }
+];
+
+[ QueryChildSub;
+	if ((parent(Child) == parent(player))) {
+		AskChild(noun);
+	}
+	else {
+    if (TestScope(player,Child) == true) {
+      if (ItemIsNotBlockedByBottle(false, Child) == false) rtrue;
+    }
+		"You don't see them here.";
+	}
+];
+
+[ QueryMaliciaFurSub;
+  QueryMaliciaSub(t_puppy);
+];
+[ QueryMaliciaSub t;
+	if ((parent(Malicia) == parent(Malicia))) {
+    if (t == 0) AskMalicia(noun);
+    else AskMalicia(t);
+	}
+	else {
+    if (TestScope(player,Malicia) == true) {
+      if (ItemIsNotBlockedByBottle(false, Malicia) == false) rtrue;
+    }
+		"You don't see them here.";
+	}
+];
+
+!FIXME could not get standard ask code to work properly from examples, so hacked it with this global function
+!BUG if the ask topic contains words from multiple topic names, the ask response is blank/
+[ QueryTopic;
+  switch (scope_stage) {
+      1: rfalse;
+      2: ScopeWithin(global_questions); rtrue;
+      3: "You discern that you won't learn much asking about that.";
+  }
+];
+
+!removed from global questions to save space:
+!creaking bar
+!floorboards
+!pub bottles
+!closet door
+Object global_questions;
+Object -> t_appraise "appraise"
+	with
+		name 'appraise';
+Object -> t_curse "curse"
+	with
+		name 'curse';
+Object -> t_uncurse "uncurse"
+	with
+		name 'uncurse';
+Object -> t_swap "swap"
+	with
+		name 'swap';
+Object -> t_money "money"
+	with
+    reference_obj Cheque,
+		name 'money';
+Object -> t_wish "wish"
+	with
+		name 'wish';
+Object -> t_freedom "freedom"
+	with
+		name 'freedom';
+Object -> t_karma "karma"
+	with
+		name 'karma';
+Object -> t_bottle "intricate glass bottle"
+  with
+    reference_obj Bottle,
+    name 'intricate' 'glass' 'bottle';
+Object -> t_cork "cork"
+  with
+    reference_obj Cork,
+    name 'cork' 'seal';
+Object -> t_fabric "pile of fabric"
+  with
+    reference_obj PileOfFabric,
+    name 'pile' 'of' 'fabric';
+Object -> t_broom "cleaning appliances"
+  with
+    reference_obj CleaningAppliances,
+    parse_name [ w1 w2;
+      w1 = NextWord(); w2 = NextWord();
+      if(w1 == 'cleaning' && w2 == 'appliances') return 2;
+      if(w1 == 'broom' && w2 == 0) return 1;
+      if(w1 == 'appliances' && w2 == 0) return 1;
+    ];
+Object -> t_broomcloset "broom closet"
+  with
+    reference_obj ClosetObject,
+  	parse_name [ w1 w2;
+  		w1 = NextWord(); w2 = NextWord();
+  		if(w1 == 'broom' && w2 == 'closet') return 2;
+      if(w1 == 'closet' && w2 == 0) return 1;
+  	];
+Object -> t_note "note"
+	with
+    reference_obj Note,
+    name 'note';
+Object -> t_knife "knife"
+	with
+    reference_obj Knife,
+    name 'knife';
+Object -> t_pub "The Red Anchor"
+  with
+    reference_obj TheRedAnchorObject,
+  	parse_name [ w1 w2;
+  		w1 = NextWord(); w2 = NextWord();
+  		if(w1 == 'red' && w2 == 'anchor') return 2;
+      if(w1 == 'pub' && w2 == 0) return 1;
+  	];
+Object -> t_herring "cast iron red herring"
+  with
+    reference_obj RedHerring,
+    name 'cast' 'iron' 'red' 'herring';
+
+Object -> t_drunkard "corpulent drunkard"
+  with
+    reference_obj CorpulentDrunkard,
+    name 'corpulent' 'drunkard';
+
+Object -> t_james "James Merl III"
+  with
+    reference_obj James,
+    name 'james' 'merl' 'iii' 'proprietor';
+
+Object -> t_puppy "adorable spotted puppy"
+  with
+    reference_obj Puppy,
+    name 'adorable' 'spotted' 'puppy';
+
+Object -> t_officedoor "records office door"
+  with
+    reference_obj RecordsOfficeDoor,
+    parse_name [ w1 w2 w3;
+  		w1 = NextWord(); w2 = NextWord(); w3 = NextWord();
+  		if(w1 == 'records' && w2 == 'office' && w3 == 'door') return 3;
+  		if(w1 == 'office' && w2 == 'door') return 2;
+  	];
+
+Object -> t_office "records office"
+  with
+    reference_obj OfficeObject,
+    parse_name [ w1 w2 w3;
+  		w1 = NextWord(); w2 = NextWord(); w3 = NextWord();
+  		if(w1 == 'records' && w2 == 'office' && w3 == 0) return 2;
+  		if(w1 == 'office' && w2 == 0) return 1;
+  	];
+
+Object -> t_computer "computer"
+  with
+    reference_obj Computer,
+    name 'computer';
+
+Object -> t_park "Jekyll Park"
+  with
+    reference_obj ParkObject,
+    name 'jekyll' 'park';
+
+Object -> t_child "young boy"
+  with
+    reference_obj Child,
+    parse_name [ w1 w2 w3;
+      w1 = NextWord(); w2 = NextWord(); w3 = NextWord();
+      if(w1 == 'distressed' || w1 == 'delighted' || w1 == 'horrified') {
+        if (w2 == 'young' && w3 == 'boy') return 3;
+      }
+      if (w1 == 'young' && w2 == 'boy' && w3 == 0) return 2;
+      if (w1 == 'boy' && w2 ==  0) return 1;
+    ];
+
+Object -> t_alley "Alliteration Alley"
+  with
+    reference_obj AlleyObject,
+    name 'alliteration' 'alley';
+
+Object -> t_malicia "Malicia de Monns"
+  with
+    reference_obj Malicia,
+    name 'malicia' 'de' 'monns';
+
+Object -> t_cheque "cashier''s cheque"
+  with
+    reference_obj Cheque,
+    name 'cashier''s' 'cheque' 'check';
+
+Object -> t_chain "ethereal chain"
+  with
+    reference_obj EtherealChain,
+    name 'ethereal' 'chain';
+
+Object -> t_conch "conch shell"
+  with
+    reference_obj Conch,
+    name 'conch' 'shell' 'enzo' 'enz';
+
+Object -> t_djinn "(self object)"
+  with
+    reference_obj mySelfobj,
+    parse_name [ _words;
+			while(NextWordStopped() == mySelfobj.&name-->0 or mySelfobj.&name-->1 or
+					mySelfobj.&name-->2 or mySelfobj.&name_other-->0 or
+					mySelfobj.&name_other-->1 or	mySelfobj.&name_other-->2) _words++;
+			return _words;
+		];
+
+Object -> t_cat "cat"
+  with
+    name 'cat';
+
+!FIXME I know! I know! It's horrible! I couldn't get ask to work properly and was running out of time.
+Extend only 'ask' replace
+	* 'conch'/'shell'/'conch shell'/'enzo'/'enz' 'about' scope=QueryTopic -> QueryEnzo
+  * 'james'/'merl'/'james merl'/'james merl iii'/'merl iii'/'iii'/'proprietor' 'about' scope=QueryTopic -> QueryJames
+  * 'rich' 'about' scope=QueryTopic -> QueryRich
+  * 'distressed'/'boy'/'distressed boy'/'distressed young boy'/'young'/'young boy' 'about' scope=QueryTopic -> QueryChild
+  * 'Malicia'/'Monns'/'Malicia Monns'/'Malicia de Monns'/'de Monns'/'de' 'about' scope=QueryTopic -> QueryMalicia
+  * 'Malicia'/'Monns'/'Malicia Monns'/'Malicia de Monns'/'de Monns'/'de' 'about' 'fur'/'furs'/'coat' -> QueryMaliciaFur
+  * 'Malicia'/'Monns'/'Malicia Monns'/'Malicia de Monns'/'de Monns'/'de' 'about' 'fur' 'coat' -> QueryMaliciaFur
+  * 'Malicia'/'Monns'/'Malicia Monns'/'Malicia de Monns'/'de Monns'/'de' 'about' 'spotted' 'fur' 'coat' -> QueryMaliciaFur;
+
+[ SwapDoors;
+  if (BroomClosetDoor.flipped == 0) {
+    BroomClosetDoor.when_open = OpenRoutine;
+    BroomClosetDoor.when_closed = CloseRoutine;
+    BroomClosetDoor.&found_in-->0 = RecordsOffice;
+    BroomClosetDoor.&found_in-->1 = MainStreet;
+    BroomClosetDoor.&door_dir-->0 = (n_to);
+    BroomClosetDoor.&door_dir-->1 = (s_to);
+    MainStreet.s_to = BroomClosetDoor;
+    RecordsOffice.n_to = BroomClosetDoor;
+    BroomClosetDoor.flipped = 1;
+    remove(BroomClosetDoor);
+
+    RecordsOfficeDoor.when_open = OpenRoutine;
+    RecordsOfficeDoor.when_closed = CloseRoutine;
+    RecordsOfficeDoor.&found_in-->0 = BroomCloset;
+    RecordsOfficeDoor.&found_in-->1 = Pub;
+    RecordsOfficeDoor.&door_dir-->0 = (e_to);
+    RecordsOfficeDoor.&door_dir-->1 = (w_to);
+    Pub.w_to = RecordsOfficeDoor;
+    BroomCloset.e_to = RecordsOfficeDoor;
+    RecordsOfficeDoor.flipped = 1;
+    remove(RecordsOfficeDoor);
+
+    scope_modified = true;
+    PlayerTo(parent(player),true);
+  }
+  else {
+    BroomClosetDoor.when_open = ClosetDoorOriginalOpenRoutine;
+    BroomClosetDoor.when_closed = ClosetDoorOriginalClosedRoutine;
+    BroomClosetDoor.&found_in-->0 = BroomCloset;
+    BroomClosetDoor.&found_in-->1 = Pub;
+    BroomClosetDoor.&door_dir-->0 = (e_to);
+    BroomClosetDoor.&door_dir-->1 = (w_to);
+    Pub.w_to = BroomClosetDoor;
+    BroomCloset.e_to = BroomClosetDoor;
+    BroomClosetDoor.flipped = 0;
+    remove(BroomClosetDoor);
+
+    RecordsOfficeDoor.when_open = OfficeDoorOriginalOpenRoutine;
+    RecordsOfficeDoor.when_closed = OfficeDoorOriginalClosedRoutine;
+    RecordsOfficeDoor.&found_in-->0 = RecordsOffice;
+    RecordsOfficeDoor.&found_in-->1 = MainStreet;
+    RecordsOfficeDoor.&door_dir-->0 = (n_to);
+    RecordsOfficeDoor.&door_dir-->1 = (s_to);
+    MainStreet.s_to = RecordsOfficeDoor;
+    RecordsOffice.n_to = RecordsOfficeDoor;
+    RecordsOfficeDoor.flipped = 0;
+    remove(RecordsOfficeDoor);
+
+    scope_modified = true;
+    PlayerTo(parent(player),true);
+  }
+];
+
+[WakeConch;
+	if (self hasnt general) {
+		Achieved(TASK_WAKE_CONCH);
+		if (self hasnt on) {
+			give self on;
+			print "You give ", (the)self, " a gentle shake.^^";
+		}
+		give self general;
+		print "You hear a startled *snort* and a stalked eyed crustacean pops its head out of the shell, sleepily looks you up and down, and then returns to the inner recesses of the shell.^";
+		rtrue;
+	}
+	rfalse;
+];
+
+!TODO: discuss cat
+[AskEnzo topic;
+  if (player.free == 1) {
+    "Now that you are no longer a Djinn, it's just a regular, non-talkative conch shell.";
+  }
+	else if (Conch hasnt proper) {
+		"Your mother taught you not to ask direct questions of strange shells.  Get better acquainted first, perhaps.";
+	}
+	switch (topic) {
+		t_swap:
+			"Enzo sounds excited.  'You can instantly swap something with another thing anywhere else in the world! You must CURSE both of the objects personally first, of course.  It will work on any cursed objects of similar size and material no matter how far away they are from you or each other.  Pretty nifty eh?  To use this power, SWAP OBJECT WITH OTHER OBJECT.'";
+		t_curse:
+			"Enzo is hushed with awe.  'You can CURSE almost thing you can see! Just CURSE OBJECT to do it.  You may also UNCURSE things.  Once two objects are cursed, you might be able to SWAP them.  Ask me about that to learn more.'";
+    t_uncurse:
+  		"Enzo sounds a little incredulous.  'Er...it is the opposite of cursing.  Not much to it, just UNCURSE OBJECT.'";
+		t_appraise:
+			"Enzo extends an eye stalk and gives you an appraising glance.  'Cursed objects can only be swapped if they are of similar size and material.  APPRAISE OBJECT to assess these properties.  That will help you sort out what you can SWAP the object with.'";
+    t_money:
+			"Enzo chuckles dryly.  'Even if he gets that money he wants so much, whats to keep him from losing it all again? Silly mortals.'";
+    t_wish:
+			"'I seem to recall him screaming ~MAKE ME RICH!~ quite furiously when last you two discussed wishes.  So original.'";
+    t_freedom:
+			"'There are two ways to earn your freedom - either grant the wish of your owner, or get someone else to take your place in the bottle and seal it.'";
+    t_karma:
+			"Enzo sounds disturbed.  'Never forget that ~they~ are watching, boss.  ~They~ see you when you are sleeping.  ~They~ know when you are awake.  ~They~ know if you have been bad or good! But I am not one to judge - I am a conch, not a cricket...'";
+    t_bottle:
+			"'A curious creature for sure, boss! Inscrutable and hungry.  You are stuck with it until either you grant that wish, or you get someone else to take your place in the bottle.'";
+    t_cork:
+			"'That there is what seals the deal, so to speak.  Once that goes tightly in the top of the bottle, nothing that is in it can get out.'";
+    t_fabric:
+			"Enzo shudders.  'Your owner once had a cat that slept in that, until one day he slept too close to the bottle instead...'";
+    t_cat:
+			"Enzo sniffs.  'It looked to be a most horribly painful way to die...'";
+    t_broom:
+			"Enzo sounds skeptical.  'They call them cleaning appliances, but I could swear the place gets dirtier every time they are used!'";
+    t_broomcloset:
+			"'Home sweet home, eh boss? Yuck.'";
+    t_note:
+			"'I wouldn't worry too much about that.  He all-bluster-no-blisters if you catch my drift.'";
+    t_knife:
+			"'He calls that a knife? Pssh. I have seen bigger.  Much bigger.'";
+    t_pub:
+  		"'Rumor has it that The Red Anchor was once a successful business.'";
+    t_herring:
+  		"'I just cannot help it.  It feels important - extremely important!'";
+    t_drunkard:
+  		"'He is always exactly in that spot.  I have never seen him move, or even make a sound.  It is a little creepy and exceedingly sad.'";
+    t_james:
+  		"'Full-time tavern keeper, part-time occult hobbyist.  Not particularly skilled at either, methinks.'";
+    t_puppy:
+  		"'I am not really a dog person, boss.  Sure, I guess it is cute.'";
+    t_officedoor:
+  		"'That is one formidable entry system! Someone certainly spared no expense on securing that office.'";
+    t_office:
+  		"Enzo sounds unimpressed.  'Only a town filled to the brim with criminals needs an entire building reserved for name changes.'";
+    t_computer:
+  		"Enzo stops you short.  'I am but a humble crustacean.  The wonders of technology are beyond me.'";
+    t_park:
+  		"'I am no expert on parks but...is the grass not usually more green?' Enzo's voice trails off.";
+    t_child:
+  		"Enzo sighs.  'I have seen that one around - he is a sweet child from a broken home.  Plenty more like him around here.";
+    t_alley:
+  		"Enzo seems mildly amused.  'It seems some city planners have spent too much time with their thick thesauruses.'";
+    t_malicia:
+  		"The fear in Enzo's voice is palpable.  'There is something terribly off about that woman.  I do not feel safe around her, let us keep our distance.'";
+    t_cheque:
+  		"Enzo sounds uninterested.  'Money is for the monkeys, boss.  For more highly evolved marine life such as myself, virtue is a reward unto itself.'";
+    t_chain:
+  		"Enzo is sympathetic.  'Better you than me, that is for certain.  That chain looks awfully uncomfortable.'";
+    t_conch:
+  		"Enzo's voice swells with pride.  'Eigth generation Djinn familiar at your service!'";
+    t_djinn:
+  		"'I consider you my master, my responsibility, and of course, my friend.  When you remember that I exist anyway.'";
+    default:
+      "'Not sure, not really my area boss.'";
+	}
+];
+
+!TODO: need to discuss cat
+!TODO: add rags object
+[AskJames topic;
+  if (James has on) {
+    "", (The)James, " is gleefully muttering to himself and completely ignores your question.";
+  }
+  else {
+    switch (topic) {
+      t_money:
+        "", (The)James, " sneers as you.  'Do not talk to me about money, Djinn - actions speak louder then words, yes?'";
+      t_wish:
+        "", (The)James, " widens his eyes furiously.  'For the six-hundred-thousandth-time, MAKE ME RICH!'";
+      t_freedom:
+  			"", (The)James, " shudders with rage.  'All you have to do is grant my wish! Why is that so much to ask?'";
+      t_bottle:
+  			"", (The)James, " eyes your bottle with contempt and utters a curse in ancient Sanskrit.";
+      t_fabric:
+  			"'That reminds me!' bellows ", (the)James, ".  'What have you done with my cat?'";
+      t_cat:
+  			"'I have not seen my cat in weeks' mourns ", (the)James, ".";
+      t_broomcloset:
+  			"'I will be all to glad to put you back in there until you learn some manners and grant my wish.'";
+      t_note:
+  			"His lower lip trembles with fury.  'One of these days, you shall see!'";
+      t_knife:
+        if (Knife in player) {
+  			     "'That is mine! Give it back, Djinn!'";
+           }
+        "His lower lip trembles with fury.  'One of these days, you shall see!'";
+      t_pub:
+  			"The veneer of anger falters for a moment, and he appears crestfallen.  'I love this place.  It was not always like this...'";
+      t_herring:
+        "'Leave that alone! It is very important.'";
+      t_drunkard:
+        "'Leave him alone! I have few enough customers as it is.'";
+      t_james:
+        "'All you need to know about me is that I am your owner, and you are bound to grant my wish.  MAKE ME RICH, DJINN!'";
+      t_puppy:
+        if (Puppy in Pub)
+  			  "'Get that thing out of my bar!' bellows ", (the)James, ".";
+        else
+          "'No dogs allowed!'";
+      t_child:
+        if (Child in Pub)
+          "'Get that thing out of my bar!' bellows ", (the)James, ".";
+        else
+          "'No children allowed!'";
+      t_malicia:
+  			"His expression momentarilly fades from one of perpetual anger to one of greed and lust.  'We could make a good pair, she and I...' he muses.";
+      default:
+        "", (The)James, " furrows his brow even further - no easy feat - and replies 'I do not want to hear another word out of you unless its about my money!'";
+    }
+  }
+];
+
+!add ask child about name
+[AskChild topic;
+  if (Child has on) {
+    "The boy looks back at you with eyes deadened by cruel disillusionment.  He remains silent.";
+  }
+  else if (Child has general) {
+    "", (The)Child, " doesn't seem to hear you - he's busy cuddling and cooing at his puppy.";
+  }
+  else {
+    switch (topic) {
+      t_money:
+  			"'Papa always says we do not have any.'";
+      t_wish:
+  			"'I have only one wish - I want my puppy back!'";
+      t_pub:
+    		"'I tried to go in there once, the owner boxed my ears.  Then I cam home and papa boxed them again!'";
+      t_james:
+    		"'I do not like him.  He is always mean.'";
+      t_puppy:
+    		"'Can you help me catch my puppy please? I just do not know what to do!'";
+      t_cat:
+  			"'No! I want my puppy!'";
+      t_park:
+    		"'I bring my puppy here to play but he ran away from me this time!'";
+      t_child:
+    		"'Mama and papa tell me not to talk to strangers.  Please, just help me catch my puppy!'";
+      t_malicia:
+    		"'She seems like a nice lady, she says she likes puppies too!'";
+      t_cheque:
+    		"'I have heard those can be worth a lot of money!'";
+      t_bottle:
+    		"'Is that chain a leash? Is that bottle kind of like your pet or something?'";
+      t_chain:
+    		"'Is that chain a leash? Is that bottle kind of like your pet or something?'";
+      t_conch:
+    		"'I do not much like shells.  The are cold and make frightening noises when you listen to them.'";
+      t_djinn:
+        "'Mama and papa tell me not to talk to strangers.  Please, just help me catch my puppy!'";
+      default:
+        "The young boy doesn't seem to know what to say about that.  He looks away, distressed.";
+  	}
+  }
+];
+
+!TODO: need to discuss coat
+[AskMalicia topic;
+  if (Malicia has on) {
+    "Malicia gives you a look that would freeze an active volcano solid, but says nothing.";
+  }
+  else if (Malicia has general) {
+    "", (The)Malicia, " is gleefully muttering to herself and completely ignores your question.";
+  }
+  else {
+    switch (topic) {
+      t_swap, t_curse, t_uncurse, t_appraise:
+        "",(The)Malicia, " rebukes you.  'Do not even think about trying your Djinn tricks on me! I am spoken for.'";
+      t_money:
+        "",(The)Malicia, " gives a sly, yellowed grin.  'I have more than you can imagine and will do with it as I wish.'";
+      t_wish:
+        "",(The)Malicia, " seems stricken.  'I have everything I want! Except.  That.  Puppy.'";
+      t_bottle:
+        "'No thanks.  We have already got one, you see.'";
+      t_knife:
+        "",(The)Malicia, " seems distracted.  'That reminds me.  I need to hone my good skinning knife.'";
+      t_pub:
+        "",(The)Malicia, " shudders with disgust.  'It is a horrid place with a horrid owner in a horrid part of town!'";
+      t_james:
+        "",(The)Malicia, " shudders with disgust.  'He is a horrid man who runs a horrid place in a horrid part of town!'";
+      t_puppy:
+        "",(The)Malicia, "'s eyes glaze over.  'I love puppies.  Soft, smooth, silky, furry, puppies...'";
+      t_cat:
+  			"'There is a thought! Hmmm...cats...I have not tried that yet...'";
+      t_park:
+        "'You are too far north! The park is just over there, fool!' she announces condescendingly.";
+      t_child:
+        "",(The)Malicia, " narrows her yes.  'Wretched little things.  But at least they bring puppies to the park.'";
+      t_malicia:
+        "",(The)Malicia, " is offended.  'My reputation speaks for itself!'";
+      t_cheque:
+        "'I trust you find my compensatory inclinations to be exceedingly generous.'";
+      t_conch:
+        "",(The)Malicia, " dismissed you.  'I have no use for sea shells.'";
+      t_djinn:
+        "'I have only just met you, and will be forgetting about that shortly.'";
+      default:
+        "",(The)Malicia, " ignores the question.  'I have no time for that! Where is that puppy...'";
+    }
+  }
+];
+
+Extend only 'push' first
+  * 'out'/'on'/'at' noun -> Push;
+
+[ GrantSub;
+  if (player.free == 0) {
+    "Contrary to popular belief, magic isn't as easy as it looks in the movies.  Granting wishes will involve hard work and ingenuity, not entirely unlike the puzzles of a text-based adventure game.";
+  }
+  else {
+    "You never have to grant a wish ever again!";
+  }
+];
+Verb 'grant' 'make' 'change'
+  * 'james' 'wish' -> Grant
+  * 'james' 'rich' -> Grant
+  * 'wish' -> Grant
+  * 'rich' -> Grant
+  * 'james' -> Grant
+  * -> Grant;
+
+[ ShapeshiftSub;
+  "Actually, shapeshifting is a lot like hiccups.  It's uncomfortable, embarassing, and impossible to force.";
+];
+Verb 'shapeshift'
+  * -> Shapeshift;
+Extend only 'shift' last
+  * 'my' 'shape' -> Shapeshift
+  * 'shape' -> Shapeshift;
+
+!Instantiations
+Object BroomCloset "Broom Closet"
+	with
+		description "You're in the rather dirty broom closet of The Red Anchor.
+			Various cleaning appliances line the walls. There's a pile of fabric
+			in a corner.",
+		e_to BroomClosetDoor,
+		initial [;
+			if (self hasnt general) {
+				give self general;
+        move player to Bottle;
+			}
+		];
+
+Object -> Bottle "intricate glass bottle"
+	with
+    size SIZE_SMALL,
+    material MATERIAL_ARCANE,
+    composition COMPOSED_SOLID,
+    wit 0,
+    article "an",
+		name 'intricate' 'glass' 'bottle',
+		description [;
+      if (player.free == 1) {
+        print "It is elegantly constructed from green glass.  ";
+      }
+      if (player.free == 0) {
+        print "An ethereal chain extends from the mouth of the elegant green bottle like an spindly, articulated, tongue.  The other end of the chain wraps around your right ankle.  ";
+      }
+      if (self hasnt open) {
+        print "The bottle is currently sealed shut with a cork.^";
+      }
+      else {
+        print "The bottle is currently open and it looks ";
+        if (child(self)) {
+          print "sated.^";
+        }
+        else print "hungry.^";
+      }
+      rfalse;
+    ],
+		after [;
+			Exit:
+				Achieved(TASK_ESCAPE_BOTTLE);
+				rfalse;
+      Take:
+        if (actor == player) {
+          Achieved(TASK_GET_BOTTLE);
+				}
+		],
+		before [;
+			Exit: rfalse;
+      Rub:
+        "It's the lamps, and not the bottles, that get rubbed.  You of all people should know better - you're not that innocent.";
+			Examine:
+				if (actor in self) {
+					print "Viewed from the inside, the bottle itself is completely invisible";
+					if (self hasnt open) {
+						print " apart from the cork sealing it shut";
+					}
+					print ".";
+          if (self.wit == 0) {
+            print "  It's great for miming being trapped in an imaginary and invisible cylinder! And also for practicing being actually trapped in an actual cylinder.  Because that's what you are.";
+            self.wit = 1;
+          }
+					"";
+				}
+			Receive:
+				if (noun == Cork) {
+					if (actor notin self) {
+						move noun to self;
+						give noun concealed;
+						give noun static;
+						give noun ~general;
+						give self ~open;
+						print "You seal the bottle with the cork.  ";
+
+            if (Child in Bottle || James in Bottle) {
+              print "^^";
+              FreeMe();
+            }
+
+            if (player.free == 1) {
+              print "^You are free! Free! You no longer have any magical powers, and you may TAKE SELF to complete the ritual of self possession.";
+            }
+            else print "^";
+
+            rtrue;
+					}
+					else {
+						"The cork can only be used to seal the bottle from the outside.";
+					}
+				}
+				else {
+					"The mouth of the bottle growls at you.  It clearly has no interest in receiving ", (the) noun, ".";
+				}
+				rtrue;
+			Enter:
+				if (self in actor) {
+					"You cannot figure out how to enter the bottle while holding it.";
+				}
+        else if (James in Bottle) {
+          "There is not enough room in the bottle for both you and James.";
+        }
+        else if (Child in Bottle) {
+          "There is not enough room in the bottle for both you and the young boy.";
+        }
+			Close:
+				if (self has open) {
+					if (Cork in actor) {
+            if (actor notin self) {
+  						move Cork to self;
+  						give Cork concealed;
+  						give Cork static;
+  						give Cork ~general;
+  						give self ~open;
+              print "You seal the bottle with the cork.  ";
+
+              if (Child in Bottle || James in Bottle) {
+                print "^^";
+                FreeMe();
+              }
+
+              if (player.free == 1) {
+                "^You are free! Free! You no longer have any magical powers, and you may TAKE SELF to complete the ritual of self possession.";
+              }
+              else print "^";
+
+
+              rtrue;
+            }
+            else {
+              "The cork can only be used to seal the bottle from the outside.";
+            }
+					}
+					else {
+						"You'll need to be holding the cork in order to seal it shut.";
+					}
+				}
+				else {
+					"The bottle isn't open at the moment.";
+				}
+			Open:
+				if (actor in self) {
+					if (self has open) {
+					}
+					else {
+						if (Cork has general) {
+							"When the bottle is properly sealed, there's no way to open it from the inside.  Take a close look at the seal just in case.";
+						}
+						else {
+							"The bottle is sealed tightly shut by the cork.";
+						}
+					}
+				}
+				else {
+					if (Cork in self) {
+						print "You successfully dislodge the cork with a satifying *POP*!^";
+            Achieved(TASK_PUSH_CORK);
+						give Cork ~concealed;
+						give Cork ~static;
+						move Cork to actor;
+						give bottle open;
+						rtrue;
+					}
+				}
+
+		],
+	has container openable ~open enterable transparent;
+
+  MaterialThing -> -> Cork "cork"
+  	with
+      size SIZE_SMALL,
+      material MATERIAL_VEGETABLE,
+      composition COMPOSED_SOLID,
+  		name 'cork' 'seal',
+      wit 0,
+  		before [;
+  			Examine:
+  				if (self in Bottle) {
+  					if (self has general) {
+  						print "The cork is only pushed halfway into the bottle.";
+              if (self.wit == 0) {
+                self.wit = 1;
+                print "  You would thank your gods for your owner's poor attention to detail, but they're the ones who turned you into a Djinn in the first place.  Ungrateful all-powerful beings! You all still refuse to speak to one another.";
+              }
+              "";
+  					}
+  				};
+  			Take:
+  				if (self in Bottle) {
+  					if (actor in Bottle) {
+  						"You'd have to be outside the bottle in order to obtain the cork.";
+
+  					}
+  					else {
+  						if (Bottle hasnt open) {
+  							<<Open Bottle>>;
+  						}
+  					}
+  				}
+  			Remove:
+  				if (self in Bottle) {
+  					if (actor in Bottle) {
+  						"You'd have to be outside the bottle in order to obtain the cork.";
+
+  					}
+  					else {
+  						<<Open Bottle>>;
+  					}
+  				}
+  			Touch:
+  				if (self in Bottle) {
+  					if (actor in Bottle) {
+  						if (self has general) {
+  							print "It feels a little loose.";
+  						}
+  						else {
+  							print "It's wedged in tightly.";
+  						}
+  						print "^";
+  						rtrue;
+  					}
+  				}
+  			Pull:
+  				if (self in Bottle) {
+  					if (actor in Bottle) {
+  						"You fail to grip the cork from within the bottle.";
+  					}
+  				}
+  			Push:
+  				if (self in Bottle) {
+  					if (actor in Bottle) {
+  						if (self has general) {
+  							if (Bottle hasnt open) {
+                  Achieved(TASK_PUSH_CORK);
+  								print "You successfully dislodge the cork with a satifying *POP*!^";
+  								give self ~concealed;
+  								give self ~static;
+  								move self to parent(Bottle);
+  								give bottle open;
+  								rtrue;
+  							}
+  						}
+  						else {
+  							"You squirm and strain against the cork in vain.  It's wedged in too tightly.";
+  						}
+  					}
+  				}
+  		],
+  	has concealed static general;
+
+
+MaterialThing -> PileOfFabric "pile of fabric"
+	with
+    size SIZE_LARGE,
+    material MATERIAL_VEGETABLE,
+    composition COMPOSED_MALLEABLE,
+    wit 0,
+		name 'pile' 'of' 'fabric',
+    description [;
+        print "A stingy allotment of moth-eaten sailcloth.";
+        if (self.wit == 0) {
+          self.wit = 1;
+          print "  It was recently liberated by the moth-eating cat, which sadly then slept too close to the cat-eating enchanted bottle.";
+        }
+        "";
+      ],
+    before [;
+      Take:
+        if (ItemIsNotBlockedByBottle() == false) rtrue;
+        "Being allergic to both moths and cats, you keep your distance from the pile of fabric.";
+    ],
+	has scenery;
+
+  MaterialThing -> CleaningAppliances "cleaning appliances"
+  	with
+      description "The cleaning appliances look putrid, volatile, and are best left alone.",
+      size SIZE_MEDIUM,
+      material MATERIAL_CHEMICALS,
+      composition COMPOSED_COMPLEX,
+      parse_name [ w1 w2;
+  			w1 = NextWord(); w2 = NextWord();
+  			if(w1 == 'cleaning' && w2 == 'appliances') return 2;
+  			if(w1 == 'broom') return 1;
+  			if(w1 == 'appliances') return 1;
+  		],
+    before [;
+      Take:
+				if (ItemIsNotBlockedByBottle() == false) rtrue;
+        "You happen to know exactly where ", (the)self," have been and what they have been used to clean.  Needless to say, you will not be touching any of them voluntarilly.";
+    ],
+  	has scenery pluralname;
+
+Object -> ClosetObject "broom closet"
+  with
+    parse_name [ w1 w2;
+      w1 = NextWord(); w2 = NextWord();
+      if(w1 == 'broom' && w2 == 'closet') return 2;
+      if(w1 == 'closet') return 1;
+    ],
+    found_in BroomCloset Pub,
+    description [;
+      print "Your owner keeps your bottle in ";
+      switch (location) {
+        BroomCloset: print "here";
+        default: print "there";
+      }
+      ", shut away from the potentially prying eyes of obviously oblivious inebriates.  It seems a tad paranoid.";
+    ],
+    before [;
+      Curse:
+        "You sigh wistfully, wishing you were powerful enough to curse the closet itself, and not just the things in it.  But a Djinn can always dream...";
+      Appraise:
+        "A decent broom closet may increase the value of a property by as much as @{00a7}2000! This one, on the other hand, is like great Aunt Samantha's vast collection of stray cats.  Smelly.  Dangerous.  Best left alone and avoided during polite conversation.";
+      Exit:
+        if (actor in BroomCloset) {
+            <<Go FAKE_E_OBJ>>;
+        }
+      Enter:
+        if (actor in Pub) {
+            <<Go FAKE_W_OBJ>>;
+        }
+    ],
+  has scenery;
+
+MaterialThing -> Note "note"
+	with
+    size SIZE_SMALL,
+    material MATERIAL_VEGETABLE,
+    composition COMPOSED_MALLEABLE,
+		name 'note',
+		initial "A note has been fixed to the wall with a knife.",
+		before[;
+			Examine:
+				if (ItemIsNotBlockedByBottle(1) == false) {
+					MsgExaminedFromAfar(self);
+					rtrue;
+				}
+        Achieved(TASK_READ_NOTE);
+				QuoteBox(note_text);
+				<<Look>>;
+      Curse:
+        if (self hasnt moved) {
+          if (ItemIsNotBlockedByBottle() == false) rtrue;
+          "Cursing is delicate work - remove it from the wall first.";
+        }
+		],
+		after [;
+			Take:
+				if(Knife hasnt moved && self hasnt general) {
+					! Use the general attribute to say we've already pulled
+					! the note from the wall, so we don't print this twice.
+					give self general;
+					"The knife rips a long hole in the note as you pull the
+						note from the wall.";
+				}
+		];
+
+MaterialThing -> Knife "knife"
+	with
+    size SIZE_SMALL,
+    material MATERIAL_METAL,
+    composition COMPOSED_HEFTY,
+		name 'knife' 'handle',
+    wit 0,
+    description [;
+      if(self hasnt moved) {
+        "Considering that it is buried in the wall, all you can see is the handle.  It's pretty nice.  Think you can handle all that handle?";
+      }
+      else {
+        print "Razor-honed and double-edged with a mirror polish and a lacquered maple handle.";
+        if (self.wit == 0) {
+          self.wit = 1;
+          print "  James Merl III likes his knives like he likes his women: pretty, sharp, locked away in a small dark room, and soon to be stolen and lost to him forever.";
+        }
+        "";
+      }
+    ],
+		describe [;
+			if(self hasnt moved) {
+				if(Note hasnt moved) {
+					! Knife and note haven't moved. Knife is mentioned in
+					! description of note
+					rtrue;
+				}
+				! The knife hasnt been moved but the note is gone.
+				"^A knife is stuck to the wall.";
+			}
+			! The knife has been moved. Now it should just be described as a
+			! regular object
+			rfalse;
+		],
+		after [;
+      Take:
+  			if(Note hasnt moved) {
+  				give Note moved;
+  				"The note falls to the floor as you pull out the knife.";
+  			}
+		],
+    before [;
+      Curse:
+        if (self hasnt moved) {
+          if (ItemIsNotBlockedByBottle() == false) rtrue;
+          "Cursing is delicate work - remove it from the wall first.";
+        }
+    ];
+
+MaterialThing BroomClosetDoor "broom closet door"
+	with
+    size SIZE_LARGE,
+    material MATERIAL_METAL,
+    composition COMPOSED_SOLID,
+    description "Your owner has covered this door with occult runes, but he copied them from the wrong book.  Instead of keeping you subdued in your prison, these symbols will guarantee vibrant virility to any three-toed sloth fortunate enough to cross the threshold.",
+    flipped 0,
+    short_name 0,
+		parse_name [ w1 w2 w3;
+			w1 = NextWord(); w2 = NextWord(); w3 = NextWord();
+			if(w1 == 'broom' && w2 == 'closet' && w3 == 'door') return 3;
+			if(w1 == 'closet' && w2 == 'door') return 2;
+			if(w1 == 'door') return 1;
+		],
+		when_open [;
+      ClosetDoorOriginalOpenRoutine();
+		],
+		when_closed [;
+			ClosetDoorOriginalClosedRoutine();
+		],
+		found_in BroomCloset Pub,
+		door_dir (e_to) (w_to),
+	has static door openable;
+
+[ ClosetDoorOriginalOpenRoutine;
+  if(self in BroomCloset) {
+    "You can see the pub through the door opening to the east.";
+  }
+  else {
+    print "The door to the west is open, revealing a broom closet.  ";
+    if (RedHerring hasnt moved) {
+      "A cast iron red herring hangs above it.";
+    }
+    else {
+      "";
+    }
+  }
+];
+
+[ ClosetDoorOriginalClosedRoutine;
+  if(self in BroomCloset) {
+    "The pub lies beyond the closed door to the east.";
+  }
+  else {
+    print "There's a closed door to the west.  ";
+    if (RedHerring hasnt moved) {
+      "A cast iron red herring hangs above it.";
+    }
+    else {
+      "";
+    }
+  }
+];
+
+Object Pub "Decrepit Pub"
+	with
+		description "The Red Anchor has seen better days, but you wouldn't know it from the creaking bar lined with dusty and cracked bottles.  The floorboards sag and complain at every step.  A corpulent drunkard has propped himself up against the bar and remains there unsteady, unconscious, and unimportant.  You can leave the establishment to the east through a set of saloon-style swinging half doors.",
+		w_to BroomClosetDoor,
+		e_to ExitDoors,
+    s_to 0;
+
+  MaterialThing -> RedHerring "cast iron red herring"
+  	with
+      description [;
+        print "Its tail is shaped like an anchor and it is covered in rich, red rust.  It seems like a useless and gaudy piece of trash.";
+        if (self.wit == 0) {
+          print "  But something, possibly this very sentence, tells you it could be very important.";
+          self.wit = 1;
+        }
+        "";
+      ],
+      size SIZE_SMALL,
+      material MATERIAL_METAL,
+      composition COMPOSED_HEFTY,
+      wit 0,
+  		name 'cast' 'iron' 'red' 'herring',
+      before [;
+        Take:
+				  if (ItemIsNotBlockedByBottle() == false) rtrue;
+          if (self hasnt moved) {
+            "The cast iron red herring is too high to reach.";
+          }
+      ],
+    has scenery;
+
+  MaterialThing -> PubBar "creaking bar"
+  	with
+      size SIZE_MASSIVE,
+      material MATERIAL_VEGETABLE,
+      composition COMPOSED_HEFTY,
+  		name 'creaking' 'bar'
+  	has scenery;
+
+    MaterialThing -> PubBottles "dusty and cracked bottles"
+    	with
+        size SIZE_MEDIUM,
+        material MATERIAL_GLASS,
+        composition COMPOSED_COMPLEX,
+        description "Even the top shelf is from the bottom of the barrel here.",
+    		name 'dusty' 'cracked' 'bottles'
+    	has scenery pluralname;
+
+    MaterialThing -> PubFloor "floorboards"
+    	with
+        size SIZE_MASSIVE,
+        material MATERIAL_VEGETABLE,
+        composition COMPOSED_COMPLEX,
+        description "As rotten as the prospects of the man who owns them.",
+    		name 'floorboards'
+    	has scenery pluralname;
+
+    MaterialThing -> ExitDoors "saloon-style swinging half doors"
+    	with
+        size SIZE_MEDIUM,
+        material MATERIAL_VEGETABLE,
+        composition COMPOSED_COMPLEX,
+        wit 0,
+        description [;
+          print (The)self, " are practically hanging off the hinges, less like doors and more like crackling scabs dangling from the husk of the proprietor's promising past.";
+          if (self.wit == 0) {
+            self.wit = 1;
+            print "  The idea of getting a splinter here is frighteningly disgusting, so don't touch!";
+          }
+          "";
+        ],
+    		name 'saloon-style' 'swinging' 'half' 'doors',
+        found_in Pub Intersection,
+    		door_dir (e_to) (w_to),
+    	has scenery pluralname door open;
+
+    MaterialThing -> CorpulentDrunkard "corpulent drunkard"
+    	with
+        size SIZE_MASSIVE,
+        material MATERIAL_ANIMAL,
+        composition COMPOSED_COMPLEX,
+    		name 'corpulent' 'drunkard',
+        description "Poor sod.  He couldn't sink any lower if he were a granite block with cement shoes treading water over the Mariana Trench.",
+        before [;
+          Wake: "Please don't.  He's much more sociable this way.";
+        ],
+    	has scenery animate talkable;
+
+    MaterialThing -> James "James Merl III"
+    	with
+        size SIZE_LARGE,
+        material MATERIAL_ANIMAL,
+        composition COMPOSED_COMPLEX,
+    		name 'james' 'merl' 'iii' 'proprietor',
+        unreceived_dispatch 0,
+        short_name "James Merl III",
+        wit 0,
+        description [;
+          if (self hasnt on) {
+            print "Clothed in threadbare rags, ", (the)self, " blinks back at you with eyes crusted by a decade of impotent rage.  He is a moon-blanched shadow of the man he once was and he knows it.";
+            if (self.wit == 0 && player.free == 0) {
+              self.wit = 1;
+              print "  You'd feel sorry for him is he wasn't such a thrice-cursed pain in your magically imprisoned butt.";
+            }
+            else if (self.wit == 0 && player.free == 1) {
+              self.wit = 1;
+              print "  You'd feel sorry for him is he hadn't been such a thrice-cursed pain in your previously imprisoned butt.";
+            }
+            PrintContents("  He is holding ",self);
+          }
+          else {
+            print "He is still clothed in the same threadbare rags, but he now graces the room with a jubilant smile.";
+          }
+          "";
+        ],
+    		with
+          life [;
+      			Answer,Order,Tell:
+      				print_ret "Just use TALK TO JAMES or ASK JAMES ABOUT a topic.  But don't expect much help from him.";
+            Show:
+                if (noun == Cheque) {
+                  "He stares at the cheque with raised eyebrows.  'What is that you have there, Djinn?'";
+                }
+            Give:
+              if (ItemIsNotBlockedByBottle() == false) rtrue;
+              if (noun == Cheque) {
+                move Cheque to James;
+                give self on;
+                print "'I am RICH!' cries James, weeping manly tears of joy.  'You finally granted my wish! Thank-you-thank-you-thank-you!'^^";
+
+                Achieved(TASK_GIVE_RICHNESS_TO_JAMES);
+
+                FreeMe();
+
+                if (player.free == 1) {
+                  "^You are free! Free! You no longer have any magical powers, and you may TAKE SELF to complete the ritual of self possession.";
+                }
+                else print "^";
+                rtrue;
+              }
+              else if (noun == Knife) {
+                move Knife to James;
+                "He grabs the knife, muttering something about 'thieving Djinns' being 'nothing but trouble.'";
+              }
+              rfalse;
+      		],
+          initial [;
+            if (self.unreceived_dispatch == 1) {
+              if (CompareStrings(actualNewName,richName)) {
+                if (Cheque notin James) {
+                  print "Rich is here.  He turns to face you, red of face and wide of eye.  He looks you up and down, eyes darting wildly.  'You...' he starts.  'You made me...'.  'R.......'.  He just can't bring himself to say it.^";
+                }
+                else {
+                  print "Rich is so preoccupied with his newfound gains that he hasn't even noticed his new name.^";
+                }
+              }
+              else if (CompareStrings(actualNewName,givenName)) {
+                print (The)self, " is here.  He narrows his eyes at you suspiciously.  'Yes, I think I prefer my original name if you please.'^";
+              }
+              else {
+                print (The)self, " is here.  He narrows his eyes at you suspiciously.  'What is this I hear about my name being changed to ~";
+                PrintString(actualNewName);
+                print "~? What are you up to, Djinn?'^";
+              }
+              self.unreceived_dispatch = 0;
+            } else {
+              switch (parent(James)) {
+                Pub:
+                  if (self hasnt on) {
+                    if (James.swapme == 1 && player.swapme == 1) {
+                      print (The)self," roughly shoos you out from behind the bar and returns to his rightful place there.^";
+                    }
+                    else if (James.swapme == 1 && Child.swapme == 1) {
+                      print (The)self," roughly shoos the boy out from behind the bar and returns to his rightful place there.^";
+                    }
+                    else {
+                      print (The)self," scowls at you from behind the bar.^";
+                    }
+                  }
+                  else {
+                    print (The)self," smiles at you from behind the bar.^";
+                  }
+                default:
+                  print (The)self," stares at you dryly, clearly unimpressed by his current surroundings.^";
+              }
+              if (self hasnt general) {
+                if (player.free == 0) {
+                  print "^'Did you not read the note?' roars ", (the)self, ".  'Get back in that bottle unless you are finally going to grant me my wish!'^";
+                }
+                else {
+                  print "^",(The)self, " looks up at the ceiling briefly and then returns his tortured gaze to the rotting floorboards.^";
+                }
+                give self general;
+              }
+            }
+          ],
+      has talkable animate proper;
+
+Object Intersection "Outside The Red Anchor"
+	with
+		description "To the west, the tattered swinging doors of The Red Anchor desperately beckon to passersby.  A well worn path leads north to Jekyll Park, and Main Street continues to the east.",
+		w_to Pub,
+		e_to MainStreet,
+		n_to JekyllPark;
+
+  Object -> WornPath "well-worn path"
+    with
+      name 'well' 'worn' 'path',
+    has scenery;
+
+  Object -> Passersby "passersby"
+    with
+      description "There are none to be seen.",
+      name 'passersby' 'passerby',
+    has scenery;
+
+  Object -> TheRedAnchorObject "The Red Anchor"
+    with
+      name 'red' 'anchor' 'pub',
+      wit 0,
+      description [;
+        print "It is the best pub in town, but that's just because the other pubs are much worse.  ";
+        if (self.wit == 0) {
+          print "  When The Red Anchor was awarded Town's Best Pub, the second place award went to an escaped mountain lion prowling the Alliteration Alley for unattended children.";
+          self.wit = 1;
+        }
+        "";
+      ],
+      before [;
+        Curse:
+          "You sigh wistfully, wishing you were powerful enough to curse the pub itself, and not just the things in it.  But a Djinn can always dream...";
+        Appraise:
+          "Darn it Djinn, you're an anthropomorphically embodied modality of mischief and desire - not a realtor!";
+        Exit:
+          if (actor in Pub) {
+            <<Go FAKE_E_OBJ>>;
+          }
+        Enter:
+          if (actor in Intersection) {
+            <<Go FAKE_W_OBJ>>;
+          }
+      ],
+      found_in Pub Intersection,
+    has scenery;
+
+  MaterialThing -> Puppy "adorable spotted puppy"
+  	with
+      size SIZE_SMALL,
+      material MATERIAL_ANIMAL,
+      composition COMPOSED_COMPLEX,
+  		name 'adorable' 'spotted' 'puppy',
+  		short_name "adorable spotted puppy",
+      description "Its eyes are gloriously shiny and large.  Its tail is waggingly hyper-active.  Its lustrous, soft coat of fur is like a sheet of freshly fallen white snow dotted by freshly fallen perfectly round black puppy poop pieces.  Definitely an adorable puppy.",
+      article "an",
+      before [;
+      Take:
+        if (puppy in actor) "You already have the adorable spotted puppy!";
+        "The puppy darts to and fro like lightning - it's impossible to catch.";
+      Scream,Poke,Push,Pull,Attack:
+        if (ItemIsNotBlockedByBottle() == false) rtrue;
+        Achieved(TASK_INTERACT_PUPPY);
+        if (self has general)
+          "The adorable spotted puppy fearfully shrinks away from you.";
+        if (self has on)
+          print "The adorable spotted puppy wags its tail expecting another warm gesture.  ";
+
+        switch (action) {
+          ##Scream:	print "You roar angrilly at the defenseless little puppy.^^";
+          ##Poke:		print "You cruelly poke the poor thing.^^";
+          ##Push:		print "You brashly shove the puppy out of your way.^^";
+          ##Pull:		print "You grab the poor thing's tail an pull it toward you.^^";
+          ##Attack:	print "You violently lash out at the adorable little puppy!^^";
+        }
+        AchievedKarma(KARMATASK_HARM_PUPPY);
+        !on means happy
+        !general means scared
+        give self general;
+        give self ~on;
+        "The adorable spotted puppy whimpers and cowers.";
+
+        Kiss,Pet,Stroke,Scratch:
+          if (ItemIsNotBlockedByBottle() == false) rtrue;
+          Achieved(TASK_INTERACT_PUPPY);
+          if (self has general)
+            "The adorable spotted puppy fearfully shrinks away from you.";
+          switch (action) {
+            ##Kiss:	  print "The puppy lets you draw close to give it a warm, wet kiss.^^";
+            ##Pet:		print "The puppy lets you draw close to give it a kind pat on the head.^^";
+            ##Scratch:	print "The puppy lets you draw close to scratch it playfully behind the ears.^^";
+            ##Stroke:		print "You stroke the puppy caringly from the top of its head to the tip of its tail.^^";
+          }
+          !on means happy
+          !general means scared
+          if (self hasnt general && self hasnt on) {
+            give self on;
+            AchievedKarma(KARMATASK_PET_PUPPY);
+          }
+          "The adorable spotted puppy yips happilly.";
+      ],
+    has animate;
+
+Object MainStreet "Main Street"
+	with
+    description "This street runs from east to west here.  You pass by the Town Records Office, the only government building on this side of the street.",
+    e_to [;
+      if (player.free == 0) {
+        "Wait - you had better conclude your business with your owner before venturing further into town.";
+      }
+      else {
+        "Now that you are free, you can go that way if you wish! First, you must TAKE SELF to complete the ritual of self possession.";
+      }
+      ],
+		w_to Intersection,
+		s_to RecordsOfficeDoor;
+
+MaterialThing RecordsOfficeDoor "records office door"
+with
+  size SIZE_LARGE,
+  material MATERIAL_METAL,
+  composition COMPOSED_SOLID,
+  description [;
+    print "It's an imposing, securely locked steel door.  Painted on the door are the words 'NO DJINNS ALLOWED,' with an icon of a bottle with a big red 'X' crossed over it.";
+    if (self.wit == 0) {
+        print "  That seems to be an oddly specific prohibition, no?";
+        self.wit = 1;
+    }
+    "";
+  ],
+  flipped 0,
+  short_name 0,
+  wit 0,
+	parse_name [ w1 w2 w3;
+		w1 = NextWord(); w2 = NextWord(); w3 = NextWord();
+		if(w1 == 'records' && w2 == 'office' && w3 == 'door') return 3;
+		if(w1 == 'office' && w2 == 'door') return 2;
+		if(w1 == 'door') return 1;
+	],
+	when_open [;
+    OfficeDoorOriginalOpenRoutine();
+	],
+	when_closed [;
+    OfficeDoorOriginalClosedRoutine();
+	],
+	found_in RecordsOffice MainStreet,
+	door_dir (n_to) (s_to),
+has static door openable locked;
+
+[ OfficeDoorOriginalOpenRoutine;
+  if(self in RecordsOffice)
+    "You can see Main Street to the north through the open door.";
+  "The door to the south is open, revealing the Records Office.";
+];
+
+[ OfficeDoorOriginalClosedRoutine;
+  if(self in RecordsOffice)
+    "Main Street lies beyond the closed door to the north.";
+  "The Records Office door to the south is closed and securely locked.";
+];
+
+Constant computerInput_SIZE 20;
+Array    computerInput buffer computerInput_SIZE;
+Array    givenName buffer "james merl iii";
+Array    richName buffer "rich";
+Array    herName buffer "malicia de monns";
+Array    illegalName buffer "malicia";
+Array    actualNewName buffer computerInput_SIZE*2;
+
+[ ReadChar tmp;
+  @read_char tmp;
+  return tmp;
+];
+
+[ KeyLine buf max;
+    buf->0 = max;
+    buf->1 = 0;
+    read buf 0;
+    buf->0 = 0;
+    return buf-->0;
+];
+[ PrintString buf
+      i;
+      for (i=0 : i<buf-->0 : i++)
+          print (char) buf->(i+WORDSIZE);
+];
+[ CompareStrings bufA bufB
+    i;
+    if (bufA-->0 ~= bufB-->0) rfalse;
+    for (i=0 : i<bufA-->0 : i++)
+        if ((bufA->(i+WORDSIZE)) ~= (bufB->(i+WORDSIZE))) rfalse;
+    rtrue;
+];
+[ CopyStringTo bufA bufB
+    j;
+    for (j=0 : j<bufA-->0 : j++) {
+      bufB-->j = bufA-->j;
+    }
+    rtrue;
+];
+
+
+[ UseComputer _abort _finished _step _originalName _newName;
+  Achieved(TASK_USE_COMPUTER);
+  if (player.free == 1) {
+    QuoteBox(pc_screen3);
+    <<Look>>;
+
+  }
+  QuoteBox(pc_screen);
+  PlayerTo(NameChangeSystem);
+  _abort = 0;
+  _finished = 0;
+  _step = 0;
+  print "* * * AUTHORIZED USERS ONLY * * *^^";
+  print "IF YOU ARE NOT AN AUTHORIZED USER, EXIT NOW.^^";
+  while (_finished == 0) {
+    while (_abort == 0) {
+      if (_step == 0) {
+        print "Enter Original Name Of Citizen [OR LEAVE BLANK TO EXIT] >> ";
+      }
+      if (_step == 1) {
+        print "^SEARCHING DATABASE...";
+        if (CompareStrings(computerInput,herName)) {
+          print "ERROR! NAME CHANGE FOR NON-CITIZEN PROHIBITED.^^";
+          _step = 0;
+          print "*************************************************^^";
+          print "Enter Original Name Of Citizen [OR LEAVE BLANK TO EXIT] >> ";
+        }
+        else if (CompareStrings(computerInput,actualNewName)) {
+          _originalName = actualNewName;
+          print "MATCH FOUND!^^";
+          _step++;
+        }
+        else {
+          print "NO MATCH FOUND.^^";
+          _step = 0;
+          print "*************************************************^^";
+          print "Enter Original Name Of Citizen [OR LEAVE BLANK TO EXIT] >> ";
+        }
+      }
+      if (_step == 2) {
+        print "Enter New Name Of Citizen [OR LEAVE BLANK TO EXIT] >> ";
+      }
+      if (_step == 3) {
+        print "PROCESSING...^^";
+        _newName = computerInput;
+        if (CompareStrings(_newName,actualNewName)) {
+          print "ERROR! NEW NAME MATCHES OLD NAME.^^";
+          print "*************************************************^^";
+          _step = 0;
+        }
+        else if (CompareStrings(_newName,herName) || CompareStrings(_newName,illegalName)) {
+          print "ERROR! ILLEGAL CHANGE PROHIBITED BY COPYRIGHT^^";
+          print "*************************************************^^";
+          _step = 0;
+        }
+        else {
+          print "NAME CHANGE COMPLETE.^^";
+          print "CITIZEN '";
+          PrintString(_originalName);
+          print "' IS NOW NAMED '";
+          PrintString(_newName);
+          print "'^^";
+          _step = 0;
+          print "NOTIFICATION WILL BE DISPATCHED SHORTLY^^";
+          print "*************************************************.^^";
+          CopyStringTo(_newName,actualNewName);
+          James.unreceived_dispatch = 1;
+        }
+        print "Enter Original Name Of Citizen [OR LEAVE BLANK TO EXIT] >> ";
+      }
+      DrawStatusLine();
+      if (KeyLine(computerInput, computerInput_SIZE)) {
+        _step++;
+      }
+      else {
+        _abort = 1;
+      }
+    }
+    if (_finished == 0) {
+      print "^ARE YOU SURE YOU WISH TO EXIT THE SYSTEM? ";
+      if (YesOrNo()) {
+        _finished = 1;
+      }
+      else {
+        _abort = 0;
+      }
+    }
+  }
+  QuoteBox(pc_screen2);
+  PlayerTo(RecordsOffice, true);
+
+  if (James.unreceived_dispatch == 1) {
+    if (CompareStrings(actualNewName,richName)) {
+      James.short_name = "Rich";
+      James.&name-->3 = 'Rich';
+      t_james.&name-->3 = 'Rich';
+      give James proper;
+      print "^Well, he did wish for you to make him 'rich' didn't he? His facial expression will be priceless!^^";
+      Achieved(TASK_GIVE_RICHNESS_TO_JAMES);
+      FreeMe();
+      if (player.free == 1) {
+        print "^You are free! Free! You no longer have any magical powers, and you may TAKE SELF to complete the ritual of self possession.^";
+      }
+    }
+    else if (CompareStrings(actualNewName,givenName)) {
+      James.short_name = "James Merl III";
+      give James proper;
+      James.&name-->3 = 'proprietor';
+      t_james.&name-->3 = 'proprietor';
+      print "^You suspect that you probably could have picked a better name.  His facial expression will still be priceless!^";
+    }
+    else {
+      James.short_name = "proprietor formerly known as James Merl III";
+      give James ~proper;
+      James.&name-->3 = 'proprietor';
+      t_james.&name-->3 = 'proprietor';
+      print "^You can't help but think you could have picked a better name.^^";
+    }
+  }
+  else {
+    <<Look>>;
+  }
+
+];
+
+Object RecordsOffice "Records Office"
+	with
+		description "The office is deserted and dark except for a glowing computer in the corner that patiently awaits your attention.",
+    n_to RecordsOfficeDoor;
+
+    Object -> OfficeObject "records office"
+      with
+        parse_name [ w1 w2;
+          w1 = NextWord(); w2 = NextWord();
+          if(w1 == 'records' && w2 == 'office') return 2;
+          if(w1 == 'office') return 1;
+        ],
+        found_in RecordsOffice MainStreet,
+        description [;
+          if (actor in MainStreet) print "It's hard to see from out here, but it's probably just ";
+          else print "Just ";
+          "another cluttered altar of worship consecrated to the gods of bureaucracy.";
+        ],
+        before [;
+          Curse:
+            "You sigh wistfully, wishing you were powerful enough to curse the office itself, and not just the things in it.  But a Djinn can always dream...";
+          Appraise:
+            "Darn it Djinn, you're an anthropomorphically embodied modality of mischief and desire - not a realtor!";
+          Exit:
+            if (actor in RecordsOffice) {
+                <<Go FAKE_N_OBJ>>;
+            }
+          Enter:
+            if (actor in MainStreet) {
+              <<Go FAKE_S_OBJ>>;
+            }
+        ],
+      has scenery;
+
+  MaterialThing -> Computer "computer"
+    with
+      name 'glowing' 'computer',
+      description "Someone has carelessly left the terminal logged in.",
+      before [;
+        Use:
+          UseComputer();
+          rtrue;
+        SwitchOff:
+          "Probably best if you leave it the way you found it.";
+        SwitchOn:
+          print "That is already on.  Would you like to use the computer? ";
+          if(YesOrNo()) {
+            UseComputer();
+          }
+          rtrue;
+      ],
+      after [;
+        Examine:
+          print "^Would you like to use the computer? ";
+          if(YesOrNo()) {
+            UseComputer();
+          }
+      ],
+    has scenery switchable on;
+
+Object NameChangeSystem "TO DISCONNECT, LEAVE INPUT BLANK AND PRESS [ENTER]";
+
+Object FarSide "The Far Side of the Universe";
+
+Object JekyllPark "Jekyll Park"
+	with
+		description "This park is small, bare, littered, and brown.  You can proceed north to the apparently aptly named Alliteration Alley, or return south towards the pub district.",
+    cant_go "You take a moment to aimlessly meander through the park, searching for the innocence of your misspent youth.  Realizing that you are much more likely to find something rancid and lumpy to step in, you wander back to the entrance.",
+		s_to Intersection,
+		n_to NorthAlley;
+
+  Object -> ParkObject "Jekyll Park"
+    with
+      parse_name [ w1 w2;
+        w1 = NextWord(); w2 = NextWord();
+        if(w1 == 'jekyll' && w2 == 'park') return 2;
+        if(w1 == 'park') return 1;
+      ],
+      found_in NorthAlley JekyllPark,
+      description [;
+        switch (location) {
+          JekyllPark: "It's just a narrow strip of unpaved ground where dogs come to take their people for walks.";
+          default: "To the south, the pitiless pavement of Alliteration Alley gradually gives way to the Jekyll Park's parched patches of grizzled grass.";
+        }
+      ],
+      before [;
+        Curse:
+          "You sigh wistfully, wishing you were powerful enough to curse the park itself, and not just the things in it.  But a Djinn can always dream...";
+        Appraise:
+          "Darn it Djinn, you're an anthropomorphically embodied modality of mischief and desire - not a realtor!";
+      ],
+    has scenery;
+
+
+  MaterialThing -> Child "distressed young boy"
+  	with
+      size SIZE_LARGE,
+      material MATERIAL_ANIMAL,
+      composition COMPOSED_COMPLEX,
+  		name 'distressed' 'young' 'boy',
+      short_name "distressed young boy",
+      introduced 0,
+      initial [;
+        if (self.introduced == 0) {
+          print "A wailing young boy comes running up to you.  'My puppy is too fast for me! He ran away and I cannot catch him! Please help!'^";
+          self.introduced = 1;
+        }
+        else if (self has on) {
+          print "A ", (string)self.short_name, " is standing here.  His face is pale and his lips quiver with untold trauma.^";
+        }
+        else if (self has general) {
+          print "A ", (string)self.short_name, " is standing here.  He is the very picture of exuberant and innocent joy.^";
+        }
+        else {
+          print "A ", (string)self.short_name, " standing here cranes his neck to left and right, tears streaming down his face. 'Puppy?'^";
+        }
+      ],
+      description [;
+        print "The young boy is large for his age and appears malnourished, dirt-kissed, and scabby of knee.  That puppy is probably his only source of joy.  ";
+        if (self has on) {
+          print "Unsurprisingly, ", (the)self, " is clearly horrified for horrifying reasons.  ";
+        }
+        else if (self has general) {
+          print "Unsurprisingly, ", (the)self, " is clearly delighted for delightful reasons.  ";
+        }
+        else {
+          print "Unsurprisingly, ", (the)self, " is clearly distressed for distressing reasons.  ";
+        }
+        if (child(self)) {
+          PrintContents("He is holding ", self);
+          ".";
+        }
+        else "";
+      ],
+  		with
+        life [;
+    			Answer,Order,Tell:
+            if (ItemIsNotBlockedByBottle() == false) rtrue;
+            if (self has on)
+              "He is too horrified to respond.";
+            if (self has general)
+              "He is too delighted to respond.";
+    				"He is too distraught to respond.";
+          Give:
+            if (ItemIsNotBlockedByBottle() == false) rtrue;
+            if (noun == Puppy) {
+              Achieved(TASK_GIVE_PUPPY);
+              AchievedKarma(KARMATASK_RESCUE_PUPPY);
+              move Puppy to self;
+              if (self hasnt on) {
+                give self general;
+                self.&name-->0 = 'delighted';
+                self.short_name = "delighted young boy";
+                "The young boy beams with delight!";
+              }
+              else {
+                "The young boy shivers and slowly accepts the puppy.  He's been through a lot recently, wouldn't you say?";
+              }
+              rtrue;
+            }
+            else if (noun == Cheque) {
+              if (parent(Puppy) == Child) {
+                if (self hasnt on) {
+                  move Cheque to Child;
+                  print "'This will by so much food! And so many toys! And fund university educations for me and my eight siblings! Oh, mama and papa will be so happy!' cries the young boy with unrestrained glee.^";
+                  AchievedKarma(KARMATASK_PAY_BOY);
+                  rtrue;
+                }
+                else {
+                  "The young boy backs away from you as you approach.  Clearly he doesn't trust you, and rightfully so you big meanie!";
+                }
+              }
+              else {
+                "The young boy shakes his head vigorously.  He only has eyes for his puppy at the moment.";
+              }
+            }
+            rfalse;
+    		],
+        before [;
+          TalkTo:
+            if (ItemIsNotBlockedByBottle() == false) rtrue;
+              if (self has on)
+                "He is too horrified to respond.";
+              if (self has general)
+                "He is too delighted to respond.";
+      				"He is too distraught to respond.";
+        ],
+      has animate;
+
+Object NorthAlley "Alliteration Alley"
+	with
+		description "This dank, dark, and dismal alley is a breeding ground for rats, regrets, and tormented recollections.  Something seriously sinister must have scared the rats away though - they are all auspiciously absent.  The alley opens narrowly to the north and similarly to the south.",
+    cant_go "The alley opens only to the north and the south.",
+		s_to JekyllPark,
+    n_to [;
+      if (player.free == 0) {
+        "Wait - you had better conclude your business with your owner before venturing further into town.";
+      }
+      else {
+        "Now that you are free, you can go that way if you wish! First, you must TAKE SELF to complete the ritual of self possession.";
+      }
+    ];
+
+    Object -> AlleyObject "Alliteration Alley"
+      with
+        parse_name [ w1 w2;
+          w1 = NextWord(); w2 = NextWord();
+          if(w1 == 'alliteration' && w2 == 'alley') return 2;
+          if(w1 == 'alley') return 1;
+        ],
+        found_in JekyllPark NorthAlley,
+        description [;
+          switch (location) {
+            JekyllPark: "The park's parched patches of grizzled grass gradually give way to the pitiless pavement of Alliteration Alley to the north.";
+            default: "Cruel cracks in the unforgiving asphalt grin up at you from the ground.";
+          }
+        ],
+        before [;
+          Curse:
+            "You sigh wistfully, wishing you were powerful enough to curse the alley itself, and not just the things in it.  But a Djinn can always dream...";
+          Appraise:
+            "Darn it Djinn, you're an anthropomorphically embodied modality of mischief and desire - not a realtor!";
+          Exit:
+            if (actor in NorthAlley) {
+                <<Go FAKE_S_OBJ>>;
+            }
+          Enter:
+            if (actor in JekyllPark) {
+                <<Go FAKE_N_OBJ>>;
+            }
+        ],
+      has scenery;
+
+  MaterialThing -> GarbageCan "abused aluminum garbage can"
+  	with
+      size SIZE_LARGE,
+      material MATERIAL_METAL,
+      composition COMPOSED_MALLEABLE,
+      name 'abused' 'aluminum' 'garbage' 'can',
+      article "an",
+      description [;
+        print "A rarely used tribute to the honorable ambition of keeping the commonwealth clear and clean.";
+        PrintContents("  It contains ",self);
+        "";
+      ],
+      before [;
+        Enter:
+          "At the last moment, you muster sufficient dignity to refrain from placing yourself in the garbage can.  Cheer up! You may think you are trash, but this narrator does not.";
+        Take:
+          "You could, but then you would be lugging a smelly garbage can with you everywhere you go.  Have some pride, Djinn!";
+      ],
+      after [;
+        Receive:
+          if (noun == RedHerring) {
+            print "You do the only sensible thing and discard the useless red herring in the garbage can.^";
+            move RedHerring to GarbageCan;
+            AchievedKarma(KARMATASK_DISPOSE_HERRING);
+            rtrue;
+          }
+      ],
+    has container open static;
+
+  Object -> Malicia "Malicia de Monns"
+  	with
+      size SIZE_LARGE,
+      material MATERIAL_ANIMAL,
+      composition COMPOSED_COMPLEX,
+  		name 'Malicia' 'de' 'Monns',
+      short_name 0,
+      introduced 0,
+      initial [;
+        if (self.introduced == 0) {
+          print "Malicia de Monns is here - the town's eccentric and wealthy widow.  She is frantically searching for something.  'I know I saw an adorable spotted puppy somewhere nearby!' shouts Malicia.  'Give it to me and I shall reward you with an obscenely vast sum of money.  I just need one more puppy! One more...'^";
+          self.introduced = 1;
+        }
+        else if (self has on) {
+          print (The)self," glares at you, wide-eyed and indignant.^";
+        }
+        else if (self has general) {
+          print (The)self," smiles at you.^";
+        }
+        else {
+          print (The)self," scowls at you.^";
+        }
+      ],
+      description [;
+        print "Malicia de Monns is swathed in a luxurious spotted fur coat from her neck to her knees, but there is a noticeable bare patch at the small of her back.  ";
+        if (self has on) {
+          print "She also wears an indignant expression.  ";
+        }
+        else if (self has general) {
+          print "She also wears a delighted expression.  ";
+        }
+        else {
+          print "She also wears a distressed expression.  ";
+        }
+        if (child(self)) {
+          PrintContents("She is holding ", self);
+          ".";
+        }
+        else "";
+      ],
+  		with
+        life [;
+    			Answer,Order,Tell:
+            if (ItemIsNotBlockedByBottle() == false) rtrue;
+            if (self has on)
+              "She is too indignant to respond.";
+            if (self has general)
+              "She is too delighted to respond.";
+    				"She seems busy.  Perhaps ask about something specific.";
+          Give:
+            if (ItemIsNotBlockedByBottle() == false) rtrue;
+            if (noun == Puppy) {
+              Achieved(TASK_GIVE_PUPPY);
+              AchievedKarma(KARMATASK_SELL_PUPPY);
+              move Puppy to self;
+              if (self hasnt on) {
+                give self general;
+                move Cheque to player;
+                "Malicia beams with delight and hands you a cashier's cheque!";
+              }
+              else {
+                "Malicia eyes you suspiciously as she accepts the puppy.";
+              }
+            }
+            rfalse;
+    		],
+        before [;
+          TalkTo:
+            if (ItemIsNotBlockedByBottle() == false) rtrue;
+              if (self has on)
+                "She is too indignant to respond.";
+              if (self has general)
+                "She is too delighted to respond.";
+      				"She is too distraught to respond.";
+        ],
+      has animate proper female;
+
+      MaterialThing -> -> Cheque "cashier's cheque"
+      	with
+          size SIZE_SMALL,
+          material MATERIAL_VEGETABLE,
+          composition COMPOSED_MALLEABLE,
+      		name 'cashier''s' 'cheque' 'check',
+          before[;
+      			Examine:
+      				if (ItemIsNotBlockedByBottle(1) == false) {
+      					MsgExaminedFromAfar(self);
+      					rtrue;
+      				}
+      				QuoteBox(cheque_text);
+      				<<Look>>;
+      		];
+
+
+Djinn  mySelfobj "(self object)"
+	with
+    swapme 0,
+		parse_name [ _words;
+			while(NextWordStopped() == self.&name-->0 or self.&name-->1 or
+					self.&name-->2 or self.&name_other-->0 or
+					self.&name_other-->1 or	self.&name_other-->2) _words++;
+			return _words;
+		],
+		life [;
+			Give:
+				move noun to self;
+				print "~Well thank you very much ";
+				PrintOrRun(player, short_name_other, true);
+				"!~";
+		],
+		react_before[;
+			Go:
+				if (actor == player) {
+					if (Bottle notin player) {
+						if (player notin Bottle) {
+              if (player provides free && player.free == 0) {
+  							print "The chain around your ankle draws painfully taut as you step away from the bottle.  With a wet, rasping sound it slurps up the chain and pulls you back to where you were.^";
+  							rtrue;
+              }
+						}
+					}
+				}
+				rfalse;
+      Take:
+        if (self.free == 1 && noun == player) {
+          deadflag = 2;
+          rtrue;
+        };
+        rfalse;
+		],
+		name 'me' 'myself' 'self',
+		name_other 0 0 0,
+		short_name  "yourself",
+		short_name_other 0,
+    free 0,
+    ascended 0,
+		description [;
+      if (self.free == 1) {
+
+      }
+      else {
+        print "You tend to shapeshift at random.  Right now, you";
+        switch (random(8)) {
+          1: "'re a buxom blonde bombshell in gossamer pantaloons.";
+          2: " have blue skin, a goatee, and three fingers on each hand.";
+          3: " are peaking out at the world from inside a giant red ginger jar.";
+          4: "r alcohol content is 55%, you smell like a pine tree, and you feel strangely beholden to Ryan Reynolds.";
+          5: " are dreamy with light brown hair.";
+          6: " are a giant deck of fifty-two crisp plastic coated playing cards with two arms and two legs.";
+          7: " notice a tag on your back that says 'MADE IN USA - 100% COTTON.'";
+          8: " are shaped like a giant letter 'N' and you have steam pouring out the top of your head.";
+          default:
+        }
+      }
+    ],
+		capacity MAX_CARRIED,
+	has animate proper concealed transparent is_djinn;
+
+  MaterialThing -> EtherealChain "ethereal chain"
+    with
+      size SIZE_MEDIUM,
+      material MATERIAL_ARCANE,
+      composition COMPOSED_COMPLEX,
+      name 'ethereal' 'chain',
+      short_name "ethereal chain",
+      tug_wit 0,
+      x_wit 0,
+      description [;
+        print "A lengthy, glowing, unbreakable chain that drips from the mouth of the enchanted bottle and wraps around your ankle.";
+        if (self.x_wit == 0) {
+          self.x_wit = 1;
+          print "  And it looks like the bottle has drooled on it.  Ew.";
+        }
+        "";
+      ],
+      before [;
+        Disrobe:
+          print "You tug listlessly at the ethereal chain.  It doesn't budge";
+          if (self.tug_wit == 0) {
+            print ", but you know what they say! If at first you don't succeed, repeat the same futile effort and hope for inexplicably different results!";
+            self.tug_wit = 1;
+          }
+          else print ".";
+          "";
+      ],
+    has scenery worn;
+
+
+  MaterialThing -> Conch "conch shell"
+  	with
+  		number 0,
+      sleeptime 0,
+      sleepmsg 0,
+      size SIZE_SMALL,
+      material MATERIAL_ANIMAL,
+      composition COMPOSED_COMPLEX,
+  		name 'conch' 'shell' ' ' ' ',
+  		short_name "conch shell",
+      tmp,
+      description "The conch shell is shaped like a lumpy rugby ball with bright, iridescent ridges shimmering along the length of its generous aperture.",
+  		with life [;
+  			Answer,Order,Tell:
+          if (player.free == 0) {
+            print_ret "Just use TALK TO CONCH or ASK CONCH ABOUT a topic.";
+          }
+          else {
+            print_ret "Now that you are no longer a Djinn, it's just a regular, non-talkative conch shell.";
+          }
+  		],
+  		before [;
+  			Listen:
+          if (ItemIsNotBlockedByBottle() == false) rtrue;
+  				Achieved(TASK_HEAR_CONCH);
+  				print "You hear the relaxing sound of ocean waves.  ";
+          if (player.free == 0) {
+    				if (self hasnt general) {
+    					"And snoring.  Loud, obnoxious snoring.";
+    				}
+    				else {
+    					"And something that sounds like absent-minded channel surfing.";
+    				}
+          }
+          else "";
+  			TalkTo:
+          if (ItemIsNotBlockedByBottle() == false) rtrue;
+          if (player.free == 1) {
+            print_ret "Now that you are no longer a Djinn, it's just a regular, non-talkative conch shell.";
+          }
+  				if (self hasnt on) {
+  					give self on;
+  					print "You knock gently on the shell and whisper 'Hello? Anyone in there?'^^";
+  				}
+  				else {
+  				}
+  				if (WakeConch()) {
+  					!Woken by conversation?
+  					print "^";
+    			}
+  				else {
+  					!Previously woken
+  				}
+  				if (self.number == 0) {
+            Achieved(TASK_TALK_TO_CONCH);
+            StopDaemon(Conch);
+  					!OPENING SPEECH
+  					print "A hurried little voice echoes out.^^";
+  					print "'Sorry to sleep on the job, boss! I just got so bored, you see - you forgot about me again.  Djinns like yourself get foggy when kept in the bottle for too long.  Not to worry, it happens all the time.  We have a protocol for it - I'll fetch the list - be right back!'^^The shell emits some faint rummaging sounds.^";
+            print "^[Press a key to continue listening.]^";
+            ReadChar();
+            print "^The tiny voice continues.  'Step one - reintroductions! Every Djinn has a familiar, and I'm yours.  Enzo's the name! But you can call me Enz.  We're best buddies! When you remember I exist, that is.'^";
+            give self proper;
+            self.short_name = "Enzo";
+            !FIXME rewrite this to use the parse_name routine instead of the array entry hack
+            self.&name-->2 = 'Enzo';
+            self.&name-->3 = 'Enz';
+            print "^[Press a key to continue listening.]^";
+            ReadChar();
+            print "^Enzo continues to read from its list.  'Step two - your magic powers! A Djinn of your persuasion has three powers: SWAP, CURSE, and APPRAISE.  For details, just ASK ENZ ABOUT any one of those abilities.'^";
+            print "^[Press a key to continue listening.]^";
+            ReadChar();
+            print "^Enzo sounds concerned as he proceeds.  'Step three - current events! You are bound to the service of one James Merl III until either you grant his wish, or you get someone else to take your place in the bottle and seal it.  Until then, you remain tethered to your bottle, and you cannot venture very far from James either.'^";
+            print "^[Press a key to continue listening.]^";
+            ReadChar();
+            print "^Enzo cheerfully concludes the presentation.  'That is that! Any questions? Let your conch Enz be your guide! Such topics as APPRAISE, CURSE, SWAP, KARMA, and FREEDOM come to mind...'^";
+            self.number = 1;
+  				}
+  				else {
+						print "A hurried little voice echoes from within the shell.^^";
+						print "'Happy to help! Ask me about anything you see, or if you need a reminder about APPRAISE, CURSE, SWAP, FREEDOM, or KARMA!'^";
+  				}
+  				rtrue;
+  			Scream,Touch,Push,Pull,Poke,Attack,Blow,Whistle:
+          if (ItemIsNotBlockedByBottle() == false) rtrue;
+  				switch (action) {
+  					##Scream:	print "You let ", (the)self, " have it!^^";
+  					##Touch:	print "Um, ok...you tenderly caress ", (the) self,"^^";
+  					##Poke:		print "You vigorously probe ", (the) self,"^^";
+  					##Push:		print "You press down curiously on ", (the) self,"^^";
+  					##Pull:		print "You attempt to reach into the conch shell and pull at what's inside.^^";
+            ##Attack:	print "You teach ", (the)self, " the meaning of 'overkill.'^^";
+            ##Blow:	print "You blast a clear and loud C# on the accoustically productive shell.^^";
+            ##Whistle:	print "You whistle loud and low directly into the aperture of the shell.^^";
+  				}
+          if (player.free == 0) {
+    				if (self hasnt general) {
+    					give self on;
+    					<<TalkTo self>>;
+    				}
+    				switch (action) {
+    					##Scream:	"A tiny voice calmly replies from within the shell.  'Let us keep this civil please.'";
+    					##Touch:	"It extends its head out briefly, eyestalks downcast.  'Please refrain from doing that.  It demeans us both.'";
+    					##Poke:		"'Oy! Watch where you point that thing!' cries a tiny voice from within the shell.";
+    					##Push:		"It pops its head out momentarilly and gesticulates wildly with its eye stalks.  'Enough! I'm up already!'";
+    					##Pull:		"Something small and angry nips at your finger and you withdraw.  'Very funny - very funny indeed!'";
+              ##Attack:	"Audibly shaken, a timid voice replies 'Is that really so necessary?'";
+              ##Blow:	"'For the love of all things holy would you please never, ever do that again?'";
+              ##Whistle:	"'Care to knock that off, boss? That sounds spooky in here.'";
+    				}
+          }
+          else {
+            if (action == ##Push || action == ##Pull) {
+              "Nothing happens.";
+            }
+          }
+  			Wake:
+          if (ItemIsNotBlockedByBottle() == false) rtrue;
+          if (player.free == 0) {
+  				      if (WakeConch()) {
+                  print "^";
+                  <<TalkTo self>>;
+                }
+          }
+          else {
+            "Nothing happens.";
+          }
+  		],
+  		after [;
+  			Drop:
+  				give self on;
+          if (player.free == 0) {
+            <<TalkTo self>>;
+          }
+  		],
+      daemon [;
+        self.sleeptime++;
+        if (self.sleeptime >= 5) {
+          self.sleeptime = 0;
+          self.sleepmsg++;
+          if (self in player) {
+            switch (self.sleepmsg) {
+              1: print "^A soft and slight rattling noise draws your attention to the conch shell.^";
+              2: print "^You think you hear a mild gurgling noise emanating from the conch shell.^";
+              3: print "^Is it just your imagination, or is the conch shell buzzing lightly at slow and regular intervals?^";
+              4: print "^You hear faint and sleepy grunts ringing from deep within the conch shell.^";
+              5: print "^A high pitched and dreamy drawl startles you.  It's the conch shell! 'I don wanna get up for school, mommy!'^";
+              default:
+                print "That conch shell is definitely making a lot more noise than one typically expects of inanimate shells.";
+            }
+          }
+          if (self.sleepmsg >= 5) {
+            self.sleepmsg = 0;
+          }
+        }
+      ],
+  	has talkable animate ~on;
+
+[Initialise;
+	player = mySelfobj;
+  CopyStringTo(givenName,actualNewName);
+  lookmode = 2;
+  StartDaemon(Conch);
+	print "^You have a problem and his name is James Merl III.  All the junk on all the jagged shores of all the seas in all the world, and he walked up to yours.  Just your luck, he knew at once that this was no ordinary green glass bottle - that it must be a...^";
+];
