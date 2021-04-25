@@ -623,11 +623,13 @@ Verb 'prod' = 'poke';
             if (RedHerring hasnt moved) {
               give RedHerring ~scenery;
               give RedHerring moved;
-              if (noun == Knife) {
-                _nounMsg = "The knife hangs in the air above the broom closet door for a moment and then clatters to the floor.";
-              }
-              if (second == Knife) {
-                _secondMsg = "The knife hangs in the air above the broom closet door for a moment and then clatters to the floor.";
+              if (player in Pub) {
+                if (noun == Knife) {
+                  _nounMsg = "The knife hangs in the air above the broom closet door for a moment and then clatters to the floor.";
+                }
+                if (second == Knife) {
+                  _secondMsg = "The knife hangs in the air above the broom closet door for a moment and then clatters to the floor.";
+                }
               }
             }
           }
