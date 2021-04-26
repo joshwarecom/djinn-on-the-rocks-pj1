@@ -417,7 +417,10 @@ Extend only 'shout' replace
 Verb 'yell' 'scream' = 'shout';
 Verb 'kick' 'bang' 'shake' 'stab' 'choke' 'slash' = 'attack';
 
-Extend only 'go' 'enter' last
+Extend only 'go' last
+  * 'through' door -> Enter;
+
+Extend only 'enter' last
   * 'through' door -> Enter;
 
 Verb 'l' = 'look';
@@ -436,6 +439,15 @@ Extend only 'look' 'l' last
 Verb 'knock'
   * -> Knock
   * 'on' noun -> Knock;
+
+[ PlaySub;
+  if (noun == Puppy)
+    "Awww, how sweet!";
+  "An interesting idea, but not suitable to the task at hand.";
+];
+Verb 'play' 'chase'
+  * -> Play
+  * 'with' noun -> Play;
 
 [ BlowSub;
   if (noun == 0) "You huff and you puff and you blow!";
@@ -1002,7 +1014,7 @@ Verb 'wake'
   }
   else {
     if (noun == Bottle) {
-      "As you gaze deeply at ", (the) noun, ", gazes deeply into you.  You get the feeling it is you yourself being appraised! You blush and leave ", (the)noun, " alone.";
+      "As you gaze deeply at ", (the) noun, ", it gazes deeply into you.  You get the feeling it is you yourself being appraised! You blush and leave ", (the)noun, " alone.";
     }
     else {
       print (The) noun, " appears to have been claimed by another Djinn! You may not CURSE, SWAP, or APPRAISE ";
@@ -1751,7 +1763,7 @@ Object -> Bottle "intricate glass bottle"
     composition COMPOSED_SOLID,
     wit 0,
     article "an",
-		name 'intricate' 'glass' 'bottle',
+		name 'intricate' 'glass' 'bottle' 'cat-eating',
 		description [;
       if (player.free == 1) {
         print "It is elegantly constructed from green glass.  ";
@@ -2041,6 +2053,10 @@ Object -> ClosetObject "broom closet"
       ", shut away from the potentially prying eyes of obviously oblivious inebriates.  It seems a tad paranoid.";
     ],
     before [;
+      Open:
+        << Open BroomClosetDoor >>;
+      Close:
+        << Close BroomClosetDoor >>;
       Curse:
         "You sigh wistfully, wishing you were powerful enough to curse the closet itself, and not just the things in it.  But a Djinn can always dream...";
       Appraise:
@@ -2507,6 +2523,22 @@ Object MainStreet "Main Street"
 		w_to Intersection,
 		s_to RecordsOfficeDoor;
 
+    Object -> StreetObject "Main Street"
+      with
+        parse_name [ w1 w2;
+          w1 = NextWord(); w2 = NextWord();
+          if(w1 == 'main' && w2 == 'street') return 2;
+          if(w1 == 'street') return 1;
+        ],
+        description "It's a street.  What more do you want?",
+        before [;
+          Curse:
+            "You sigh wistfully, wishing you were powerful enough to curse the street itself, and not just the things on it.  But a Djinn can always dream...";
+          Appraise:
+            "Darn it Djinn, you're an anthropomorphically embodied modality of mischief and desire - not a realtor!";
+        ],
+      has scenery;
+
 MaterialThing RecordsOfficeDoor "records office door"
 with
   size SIZE_LARGE,
@@ -2527,7 +2559,10 @@ with
 		w1 = NextWord(); w2 = NextWord(); w3 = NextWord();
 		if(w1 == 'records' && w2 == 'office' && w3 == 'door') return 3;
 		if(w1 == 'office' && w2 == 'door') return 2;
+		if(w1 == 'locked' && w2 == 'door') return 2;
+		if(w1 == 'door' && w2 == 'lock') return 2;
 		if(w1 == 'door') return 1;
+		if(w1 == 'lock') return 1;
 	],
 	when_open [;
     OfficeDoorOriginalOpenRoutine();
@@ -2787,6 +2822,23 @@ Object JekyllPark "Jekyll Park"
     cant_go "You take a moment to aimlessly meander through the park, searching for the innocence of your misspent youth.  Realizing that you are much more likely to find something rancid and lumpy to step in, you wander back to the entrance.",
 		s_to Intersection,
 		n_to NorthAlley;
+
+  Object -> LitterObject "litter"
+    with
+      before [;
+        Curse:
+          "The litter is already a curse on this crummy little park.";
+        Appraise:
+          "The litter is unworthy of your attention.";
+        Take:
+          "There's too much about for one little Djinn to make a difference.";
+      ],
+      parse_name [ w1 w2;
+        w1 = NextWord(); w2 = NextWord();
+        if(w1 == 'litter' && w2 == 0) return 1;
+        if(w1 == 'trash' && w2 == 0) return 1;
+      ],
+    has scenery;
 
   Object -> ParkObject "Jekyll Park"
     with
@@ -3124,7 +3176,7 @@ Djinn  mySelfobj "(self object)"
         switch (random(8)) {
           1: "'re a buxom blonde bombshell in gossamer pantaloons.";
           2: " have blue skin, a goatee, and three fingers on each hand.";
-          3: " are peaking out at the world from inside a giant red ginger jar.";
+          3: " are peaking out at the world from inside a red ginger jar.";
           4: "r alcohol content is 55%, you smell like a pine tree, and you feel strangely beholden to Ryan Reynolds.";
           5: " are dreamy with light brown hair.";
           6: " are a giant deck of fifty-two crisp plastic coated playing cards with two arms and two legs.";
@@ -3136,6 +3188,41 @@ Djinn  mySelfobj "(self object)"
     ],
 		capacity MAX_CARRIED,
 	has animate proper concealed transparent is_djinn;
+
+  Object -> ShiftedShapes
+    with
+      parse_name [ w1 w2 w3;
+        w1 = NextWord(); w2 = NextWord(); w3 = NextWord();
+        if(w1 == 'light' && w2 == 'brown' && w3 == 'hair') return 3;
+        if(w1 == 'gossamer' && w2 == 'pantaloons' && w3 == 0) return 2;
+        if(w1 == 'pantaloons' && w2 == 0) return 1;
+        if(w1 == 'playing' && w2 == 'cards' && w3 == 0) return 2;
+        if(w1 == 'brown' && w2 == 'hair' && w3 == 0) return 2;
+        if(w1 == 'cards' && w2 == 0) return 1;
+        if(w1 == 'n' && w2 == 0) return 1;
+        if(w1 == 'steam' && w2 == 0) return 1;
+        if(w1 == 'hair' && w2 == 0) return 1;
+        if(w1 == 'tag' && w2 == 0) return 1;
+        if(w1 == 'back' && w2 == 0) return 1;
+        if(w1 == 'skin' && w2 == 0) return 1;
+        if(w1 == 'blue' && w2 == 'skin' && w3 == 0) return 2;
+        if(w1 == 'goatee' && w2 == 0) return 1;
+        if(w1 == 'fingers' && w2 == 0) return 1;
+        if(w1 == 'hand' && w2 == 0) return 1;
+        if(w1 == 'red' && w2 == 'ginger' && w3 == 'jar') return 3;
+        if(w1 == 'jar' && w2 == 0) return 1;
+        if(w1 == 'ginger' && w2 == 'jar' && w3 == 0) return 2;
+        if(w1 == 'smell' && w2 == 0) return 1;
+        if(w1 == 'arms' && w2 == 0) return 1;
+        if(w1 == 'legs' && w2 == 0) return 1;
+        if(w1 == 'ryan' && w2 == 0) return 1;
+        if(w1 == 'reynolds' && w2 == 0) return 1;
+        if(w1 == 'ryan' && w2 == 'reynolds' && w3 == 0) return 2;
+      ],
+      before [;
+        "Take grandma's advice and stop playing with that.";
+      ],
+    has scenery;
 
   MaterialThing -> EtherealChain "ethereal chain"
     with
@@ -3309,11 +3396,11 @@ Djinn  mySelfobj "(self object)"
           self.sleepmsg++;
           if (self in player) {
             switch (self.sleepmsg) {
-              1: print "^A soft and slight rattling noise draws your attention to the conch shell.^";
-              2: print "^You think you hear a mild gurgling noise emanating from the conch shell.^";
-              3: print "^Is it just your imagination, or is the conch shell buzzing lightly at slow and regular intervals?^";
-              4: print "^You hear faint and sleepy grunts ringing from deep within the conch shell.^";
-              5: print "^A high pitched and dreamy drawl startles you.  It's the conch shell! 'I don wanna get up for school, mommy!'^";
+              1: print "^A soft and slight rattling noise draws your attention to your conch shell.^";
+              2: print "^You think you hear a mild gurgling noise emanating from your conch shell.^";
+              3: print "^Is it just your imagination, or is your conch shell buzzing lightly at slow and regular intervals?^";
+              4: print "^You hear faint and sleepy grunts ringing from deep within your conch shell.^";
+              5: print "^A high pitched and dreamy drawl startles you.  It's your conch shell! 'I don wanna get up for school, mommy!'^";
               default:
                 print "That conch shell is definitely making a lot more noise than one typically expects of inanimate shells.";
             }
