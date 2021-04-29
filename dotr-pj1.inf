@@ -1,4 +1,11 @@
 Zcharacter table + '@{00a7}';
+
+!Welcome to my humble source code home!
+!FIXME denotes items that could likely be done much better
+!BUG denotes items that knowingly malfunction
+!TODO denotes future plans.
+!There are a few places where I altered the lib directly to make things easier
+
 !% -~S
 !% $OMIT_UNUSED_ROUTINES=1
 ! The very first lines of the main source code file for a game can contain compiler options, like the two lines above.
@@ -6,8 +13,8 @@ Zcharacter table + '@{00a7}';
 !   it adds ~10 KB to the story file size and it makes the game slower.
 ! $OMIT_UNUSED_ROUTINES=1 makes the compiler remove all routines which aren't used. This can save some space.
 
-Constant Story      "Djinn on the Rocks"; ! Change!
-Constant Headline   "^A PunyJam #1 game by Joshua Wilson^"; ! Change if you like
+Constant Story      "Djinn on the Rocks";
+Constant Headline   "^A PunyJam #1 game by Joshua Wilson^...and many helpful testers.  To list them, type CREDITS^";
 
 ! Uncomment ONE of the two following lines, to show either time or score/turns
 ! Leaving both commented out makes the library bigger.
@@ -141,9 +148,10 @@ Constant MATERIAL_CHEMICALS 6;
   print "^There are six ways to win the game! Can you find them all?^";
   print "- Karma Victory at +100 or -100! Hint - you can swap the puppy back after giving it away...^";
   print "- Perhaps it's time for someone else to take their turn in the bottle^";
-  print "- There's more than one way to make a man rich^";
+  print "- There's more than one way to make a man 'rich'^";
   print "Good luck, enjoy, and thank you for playing!^";
 ];
+
 [DisallowTakeAnimate;
 	if (noun == Conch) rfalse;
 ];
@@ -282,6 +290,7 @@ Include "puny.h";
     DrawStatusLine();
   	if (YesOrNo()) {
   		print "^The Spirit smiles.  With an effortless gesture of her first and ninth hands, she grants James' wish and the deed is done.  'Take your place at my side.  There is much more for you to do.'^^";
+      Achieved(TASK_GIVE_RICHNESS_TO_JAMES);
   		deadflag = 2;
   	}
   	else {
@@ -297,6 +306,7 @@ Include "puny.h";
     DrawStatusLine();
   	if (YesOrNo()) {
   		print "^'Ha! You and I are going to get along just fine my friend.' With a flick of his forked tail, the deed is done.  'Now come with me and learn from the master...'^^";
+      Achieved(TASK_GIVE_RICHNESS_TO_JAMES);
   		deadflag = 2;
   	}
   	else {
@@ -395,6 +405,11 @@ Class MaterialThing
 		];
 
 !Verbs
+[ListCreditsSub;
+  print "Invaluable testing support provided by:^Tiana Wilson, Mikrokosmonaut, Joe Faust, Dinglehopper, Dave Warner, Darchalus, Cana Wade, and Caleb Robert Wilson^";
+];
+Verb meta 'credits'
+  * -> ListCredits;
 [ ScreamSub;
 	if (noun) {
 		if (noun == player) {
@@ -427,6 +442,18 @@ Verb 'l' = 'look';
 Extend only 'look' 'l' last
   * noun -> Examine;
 
+[IsCork;
+  return (noun == Cork);
+];
+[IsBottle;
+  return (noun == Bottle);
+];
+[PullFromBottleSub;
+  <<Open Bottle>>;
+];
+Extend only 'pull' last
+  * noun=IsCork 'from' noun=IsBottle -> PullFromBottle;
+
 [ KnockSub;
   if ((noun == BroomClosetDoor) || (noun == RecordsOfficeDoor)) {
     "The door is heavy, which hurts your knuckles.  There is no response, which hurts your pride.";
@@ -447,7 +474,17 @@ Verb 'knock'
 ];
 Verb 'play' 'chase'
   * -> Play
+  * noun -> Play
   * 'with' noun -> Play;
+
+[IsPuppy;
+  return (noun == Puppy);
+];
+[ CatchSub;
+  <<Take Puppy>>;
+];
+Verb 'catch'
+  * noun=IsPuppy -> Catch;
 
 [ BlowSub;
   if (noun == 0) "You huff and you puff and you blow!";
@@ -1414,13 +1451,21 @@ Object -> t_cat "cat"
 !FIXME I know! I know! It's horrible! I couldn't get ask to work properly and was running out of time.
 Extend only 'ask' replace
 	* 'conch'/'shell'/'conch shell'/'enzo'/'enz' 'about' scope=QueryTopic -> QueryEnzo
+	* 'conch'/'shell'/'conch shell'/'enzo'/'enz' scope=QueryTopic -> QueryEnzo
   * 'james'/'merl'/'james merl'/'james merl iii'/'merl iii'/'iii'/'proprietor' 'about' scope=QueryTopic -> QueryJames
+  * 'james'/'merl'/'james merl'/'james merl iii'/'merl iii'/'iii'/'proprietor' scope=QueryTopic -> QueryJames
   * 'rich' 'about' scope=QueryTopic -> QueryRich
+  * 'rich' scope=QueryTopic -> QueryRich
   * 'distressed'/'boy'/'distressed boy'/'distressed young boy'/'young'/'young boy' 'about' scope=QueryTopic -> QueryChild
+  * 'distressed'/'boy'/'distressed boy'/'distressed young boy'/'young'/'young boy' scope=QueryTopic -> QueryChild
   * 'Malicia'/'Monns'/'Malicia Monns'/'Malicia de Monns'/'de Monns'/'de' 'about' scope=QueryTopic -> QueryMalicia
+  * 'Malicia'/'Monns'/'Malicia Monns'/'Malicia de Monns'/'de Monns'/'de' scope=QueryTopic -> QueryMalicia
   * 'Malicia'/'Monns'/'Malicia Monns'/'Malicia de Monns'/'de Monns'/'de' 'about' 'fur'/'furs'/'coat' -> QueryMaliciaFur
+  * 'Malicia'/'Monns'/'Malicia Monns'/'Malicia de Monns'/'de Monns'/'de' 'fur'/'furs'/'coat' -> QueryMaliciaFur
   * 'Malicia'/'Monns'/'Malicia Monns'/'Malicia de Monns'/'de Monns'/'de' 'about' 'fur' 'coat' -> QueryMaliciaFur
-  * 'Malicia'/'Monns'/'Malicia Monns'/'Malicia de Monns'/'de Monns'/'de' 'about' 'spotted' 'fur' 'coat' -> QueryMaliciaFur;
+  * 'Malicia'/'Monns'/'Malicia Monns'/'Malicia de Monns'/'de Monns'/'de' 'fur' 'coat' -> QueryMaliciaFur
+  * 'Malicia'/'Monns'/'Malicia Monns'/'Malicia de Monns'/'de Monns'/'de' 'about' 'spotted' 'fur' 'coat' -> QueryMaliciaFur
+  * 'Malicia'/'Monns'/'Malicia Monns'/'Malicia de Monns'/'de Monns'/'de' 'spotted' 'fur' 'coat' -> QueryMaliciaFur;
 
 [ SwapDoors;
   if (BroomClosetDoor.flipped == 0) {
@@ -1491,7 +1536,6 @@ Extend only 'ask' replace
 	rfalse;
 ];
 
-!TODO: discuss cat
 [AskEnzo topic;
   if (player.free == 1) {
     "Now that you are no longer a Djinn, it's just a regular, non-talkative conch shell.";
@@ -1569,7 +1613,6 @@ Extend only 'ask' replace
 	}
 ];
 
-!TODO: need to discuss cat
 !TODO: add rags object
 [AskJames topic;
   if (James has on) {
@@ -1668,7 +1711,6 @@ Extend only 'ask' replace
   }
 ];
 
-!TODO: need to discuss coat
 [AskMalicia topic;
   if (Malicia has on) {
     "Malicia gives you a look that would freeze an active volcano solid, but says nothing.";
@@ -1705,7 +1747,7 @@ Extend only 'ask' replace
       t_cheque:
         "'I trust you find my compensatory inclinations to be exceedingly generous.'";
       t_conch:
-        "",(The)Malicia, " dismissed you.  'I have no use for sea shells.'";
+        "",(The)Malicia, " dismisses you.  'I have no use for sea shells.'";
       t_djinn:
         "'I have only just met you, and will be forgetting about that shortly.'";
       default:
@@ -1734,7 +1776,7 @@ Verb 'grant' 'make' 'change'
   * -> Grant;
 
 [ ShapeshiftSub;
-  "Actually, shapeshifting is a lot like hiccups.  It's uncomfortable, embarassing, and impossible to force.";
+  "Actually, shapeshifting is a lot like hiccups.  It's uncomfortable, embarassing, and nigh impossible to start or stop at will.";
 ];
 Verb 'shapeshift'
   * -> Shapeshift;
@@ -1755,6 +1797,20 @@ Object BroomCloset "Broom Closet"
         move player to Bottle;
 			}
 		];
+
+  Object -> ClosetNothingness
+    with
+      parse_name [ w1 w2;
+        w1 = NextWord();
+        if(w1 == 'wall' && w2 == 0) return 1;
+        if(w1 == 'walls' && w2 == 0) return 1;
+        if(w1 == 'corner' && w2 == 0) return 1;
+      ],
+      before [;
+        "Please believe me when I tell you that there is absolutely no reason to do that.";
+      ],
+    has scenery;
+
 
 Object -> Bottle "intricate glass bottle"
 	with
@@ -1844,7 +1900,7 @@ Object -> Bottle "intricate glass bottle"
 					"You cannot figure out how to enter the bottle while holding it.";
 				}
         else if (James in Bottle) {
-          "There is not enough room in the bottle for both you and James.";
+          "There is not enough room in the bottle for both you and ", (the)James, ".";
         }
         else if (Child in Bottle) {
           "There is not enough room in the bottle for both you and the young boy.";
@@ -1971,6 +2027,9 @@ Object -> Bottle "intricate glass bottle"
   					if (actor in Bottle) {
   						"You fail to grip the cork from within the bottle.";
   					}
+            else {
+              <<Open Bottle>>;
+            }
   				}
   			Push:
   				if (self in Bottle) {
@@ -2426,7 +2485,15 @@ Object Intersection "Outside The Red Anchor"
 
   Object -> TheRedAnchorObject "The Red Anchor"
     with
-      name 'red' 'anchor' 'pub',
+      parse_name [ w1 w2 w3;
+        w1 = NextWord(); w2 = NextWord(); w3 = NextWord();
+        if(w1 == 'red' && w2 == 'anchor' && w3 == 0) return 2;
+        if(w1 == 'pub') return 1;
+        if(w1 == 'bar' && w2 == 0) {
+          if (player in Intersection)
+            return 1;
+        }
+      ],
       wit 0,
       description [;
         print "It is the best pub in town, but that's just because the other pubs are much worse.  ";
@@ -2906,12 +2973,7 @@ Object JekyllPark "Jekyll Park"
   		with
         life [;
     			Answer,Order,Tell:
-            if (ItemIsNotBlockedByBottle() == false) rtrue;
-            if (self has on)
-              "He is too horrified to respond.";
-            if (self has general)
-              "He is too delighted to respond.";
-    				"He is too distraught to respond.";
+            print_ret "Just use TALK TO BOY or ASK BOY ABOUT a topic.";
           Give:
             if (ItemIsNotBlockedByBottle() == false) rtrue;
             if (noun == Puppy) {
@@ -2954,7 +3016,7 @@ Object JekyllPark "Jekyll Park"
                 "He is too horrified to respond.";
               if (self has general)
                 "He is too delighted to respond.";
-      				"He is too distraught to respond.";
+      				"He is too distraught to respond.  Perhaps ASK BOY ABOUT something specific.";
         ],
       has animate;
 
@@ -2971,6 +3033,18 @@ Object NorthAlley "Alliteration Alley"
         "Now that you are free, you can go that way if you wish! First, you must TAKE SELF to complete the ritual of self possession.";
       }
     ];
+
+    Object -> MissingRats
+      with
+        parse_name [ w1 w2;
+          w1 = NextWord();
+          if(w1 == 'rat' && w2 == 0) return 1;
+          if(w1 == 'rats' && w2 == 0) return 1;
+        ],
+        before [;
+          "There are no rats to be found! Where did they all go?";
+        ],
+      has scenery;
 
     Object -> AlleyObject "Alliteration Alley"
       with
@@ -3073,13 +3147,8 @@ Object NorthAlley "Alliteration Alley"
       ],
   		with
         life [;
-    			Answer,Order,Tell:
-            if (ItemIsNotBlockedByBottle() == false) rtrue;
-            if (self has on)
-              "She is too indignant to respond.";
-            if (self has general)
-              "She is too delighted to respond.";
-    				"She seems busy.  Perhaps ask about something specific.";
+          Answer,Order,Tell:
+            print_ret "Just use TALK TO MALICIA or ASK MALICIA ABOUT a topic.";
           Give:
             if (ItemIsNotBlockedByBottle() == false) rtrue;
             if (noun == Puppy) {
@@ -3104,7 +3173,7 @@ Object NorthAlley "Alliteration Alley"
                 "She is too indignant to respond.";
               if (self has general)
                 "She is too delighted to respond.";
-      				"She is too distraught to respond.";
+      				"She is not exactly the picture of patience. 'Hmmm? HMMM? What do you wish to ASK about? Out with it!'";
         ],
       has animate proper female;
 
