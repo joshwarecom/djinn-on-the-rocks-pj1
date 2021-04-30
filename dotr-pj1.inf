@@ -1796,8 +1796,6 @@ Object BroomCloset "Broom Closet"
 			if (self hasnt general) {
 				give self general;
         move player to Bottle;
-
-        move player to Pub;
 			}
 		];
 
