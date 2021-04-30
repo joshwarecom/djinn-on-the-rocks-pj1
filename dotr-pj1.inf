@@ -15,6 +15,7 @@ Zcharacter table + '@{00a7}';
 
 Constant Story      "Djinn on the Rocks";
 Constant Headline   "^A PunyJam #1 game by Joshua Wilson^...and many helpful testers.  To list them, type CREDITS^";
+Array UUID_ARRAY static string "UUID://d409fe7d-c342-44cd-b413-c0dba5e7e2fa//";
 
 ! Uncomment ONE of the two following lines, to show either time or score/turns
 ! Leaving both commented out makes the library bigger.
@@ -1795,6 +1796,8 @@ Object BroomCloset "Broom Closet"
 			if (self hasnt general) {
 				give self general;
         move player to Bottle;
+
+        move player to Pub;
 			}
 		];
 
