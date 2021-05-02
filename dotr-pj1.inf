@@ -232,7 +232,7 @@ Array note_text static --> 13 38
 "If you can read this, you have escaped"
 "from your bottle again.  I hope this  "
 "means you are ready to finally grant  "
-"my wish and make me rich.  If no, then "
+"my wish and make me rich. If no, then "
 "GET BACK IN THAT BOTTLE OR SO HELP ME "
 "I WILL CARVE A SEAL OF SOLOMON SO FAR "
 "UP YOUR COLON THAT YOU'LL BE COUGHING "
@@ -340,7 +340,7 @@ Include "puny.h";
 				print "Perhaps you could interact with ", (the) obj, " if you weren't crammed so tightly into your enchanted bottle.";
         if (player.blocked_wit == 0) {
           player.blocked_wit = 1;
-          print "  Consider availing yourself of more roomy (and less carniverous) accomodations.";
+          print "  Consider availing yourself of more roomy (and less carnivorous) accommodations.";
         }
         print "^";
 			}
@@ -1606,7 +1606,7 @@ Extend only 'ask' replace
     t_chain:
   		"Enzo is sympathetic.  'Better you than me, that is for certain.  That chain looks awfully uncomfortable.'";
     t_conch:
-  		"Enzo's voice swells with pride.  'Eigth generation Djinn familiar at your service!'";
+  		"Enzo's voice swells with pride.  'Eighth generation Djinn familiar at your service!'";
     t_djinn:
   		"'I consider you my master, my responsibility, and of course, my friend.  When you remember that I exist anyway.'";
     default:
@@ -2996,7 +2996,7 @@ Object JekyllPark "Jekyll Park"
               if (parent(Puppy) == Child) {
                 if (self hasnt on) {
                   move Cheque to Child;
-                  print "'This will by so much food! And so many toys! And fund university educations for me and my eight siblings! Oh, mama and papa will be so happy!' cries the young boy with unrestrained glee.^";
+                  print "'This will buy so much food! And so many toys! And fund university educations for me and my eight siblings! Oh, mama and papa will be so happy!' cries the young boy with unrestrained glee.^";
                   AchievedKarma(KARMATASK_PAY_BOY);
                   rtrue;
                 }
@@ -3239,7 +3239,7 @@ Djinn  mySelfobj "(self object)"
     ascended 0,
 		description [;
       if (self.free == 1) {
-
+        "You shall now inhabit a single non-shapeshifting body for the rest of your days! The novelty wore of quickly.  It's boring.";
       }
       else {
         print "You tend to shapeshift at random.  Right now, you";
@@ -3416,7 +3416,7 @@ Djinn  mySelfobj "(self object)"
   					##Push:		print "You press down curiously on ", (the) self,"^^";
   					##Pull:		print "You attempt to reach into the conch shell and pull at what's inside.^^";
             ##Attack:	print "You teach ", (the)self, " the meaning of 'overkill.'^^";
-            ##Blow:	print "You blast a clear and loud C# on the accoustically productive shell.^^";
+            ##Blow:	print "You blast a clear and loud C# on the acoustically productive shell.^^";
             ##Whistle:	print "You whistle loud and low directly into the aperture of the shell.^^";
   				}
           if (player.free == 0) {
