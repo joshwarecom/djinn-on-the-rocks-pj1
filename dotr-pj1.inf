@@ -16,6 +16,7 @@ Zcharacter table + '@{00a7}';
 Constant Story      "Djinn on the Rocks";
 Constant Headline   "^A PunyJam #1 game by Joshua Wilson^...and many helpful testers.  To list them, type CREDITS^";
 Array UUID_ARRAY static string "UUID://d409fe7d-c342-44cd-b413-c0dba5e7e2fa//";
+Release 2;
 
 ! Uncomment ONE of the two following lines, to show either time or score/turns
 ! Leaving both commented out makes the library bigger.
@@ -1548,7 +1549,7 @@ Extend only 'ask' replace
 		t_swap:
 			"Enzo sounds excited.  'You can instantly swap something with another thing anywhere else in the world! You must CURSE both of the objects personally first, of course.  It will work on any cursed objects of similar size and material no matter how far away they are from you or each other.  Pretty nifty eh?  To use this power, SWAP OBJECT WITH OTHER OBJECT.'";
 		t_curse:
-			"Enzo is hushed with awe.  'You can CURSE almost thing you can see! Just CURSE OBJECT to do it.  You may also UNCURSE things.  Once two objects are cursed, you might be able to SWAP them.  Ask me about that to learn more.'";
+			"Enzo is hushed with awe.  'You can CURSE almost anything you can see! Just CURSE OBJECT to do it.  You may also UNCURSE things.  Once two objects are cursed, you might be able to SWAP them.  Ask me about that to learn more.'";
     t_uncurse:
   		"Enzo sounds a little incredulous.  'Er...it is the opposite of cursing.  Not much to it, just UNCURSE OBJECT.'";
 		t_appraise:
@@ -1622,7 +1623,7 @@ Extend only 'ask' replace
   else {
     switch (topic) {
       t_money:
-        "", (The)James, " sneers as you.  'Do not talk to me about money, Djinn - actions speak louder then words, yes?'";
+        "", (The)James, " sneers at you.  'Do not talk to me about money, Djinn - actions speak louder then words, yes?'";
       t_wish:
         "", (The)James, " widens his eyes furiously.  'For the six-hundred-thousandth-time, MAKE ME RICH!'";
       t_freedom:
@@ -1634,7 +1635,7 @@ Extend only 'ask' replace
       t_cat:
   			"'I have not seen my cat in weeks' mourns ", (the)James, ".";
       t_broomcloset:
-  			"'I will be all to glad to put you back in there until you learn some manners and grant my wish.'";
+  			"'I will be all t0o glad to put you back in there until you learn some manners and grant my wish.'";
       t_note:
   			"His lower lip trembles with fury.  'One of these days, you shall see!'";
       t_knife:
@@ -1683,7 +1684,7 @@ Extend only 'ask' replace
       t_wish:
   			"'I have only one wish - I want my puppy back!'";
       t_pub:
-    		"'I tried to go in there once, the owner boxed my ears.  Then I cam home and papa boxed them again!'";
+    		"'I tried to go in there once, the owner boxed my ears.  Then I came home and papa boxed them again!'";
       t_james:
     		"'I do not like him.  He is always mean.'";
       t_puppy:
@@ -1742,7 +1743,7 @@ Extend only 'ask' replace
       t_park:
         "'You are too far north! The park is just over there, fool!' she announces condescendingly.";
       t_child:
-        "",(The)Malicia, " narrows her yes.  'Wretched little things.  But at least they bring puppies to the park.'";
+        "",(The)Malicia, " narrows her eyes.  'Wretched little things.  But at least they bring puppies to the park.'";
       t_malicia:
         "",(The)Malicia, " is offended.  'My reputation speaks for itself!'";
       t_cheque:
@@ -2573,7 +2574,7 @@ Object Intersection "Outside The Red Anchor"
             give self on;
             AchievedKarma(KARMATASK_PET_PUPPY);
           }
-          "The adorable spotted puppy yips happilly.";
+          "The adorable spotted puppy yips happily.";
       ],
     has animate;
 
