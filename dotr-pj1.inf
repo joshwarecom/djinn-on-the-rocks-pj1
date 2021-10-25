@@ -15,7 +15,7 @@ Zcharacter table + '@{00a7}';
 
 Constant Story      "Djinn on the Rocks";
 Constant Headline   "^A PunyJam #1 game by Joshua Wilson^...and many helpful testers.  To list them, type CREDITS^";
-Array UUID_ARRAY static string "UUID://d409fe7d-c342-44cd-b413-c0dba5e7e2fa//";
+Array UUID_ARRAY static string "UUID://d409fe7d-c342-44cd-b413-c0dba5e7e2fa//"; #Ifndef UUID_ARRAY; #Endif;
 Release 2;
 
 ! Uncomment ONE of the two following lines, to show either time or score/turns
@@ -1421,10 +1421,10 @@ Object -> t_malicia "Malicia de Monns"
     reference_obj Malicia,
     name 'malicia' 'de' 'monns';
 
-Object -> t_cheque "cashier''s cheque"
+Object -> t_cheque "cashier^s cheque"
   with
     reference_obj Cheque,
-    name 'cashier''s' 'cheque' 'check';
+    name 'cashier^s' 'cheque' 'check';
 
 Object -> t_chain "ethereal chain"
   with
@@ -3184,7 +3184,7 @@ Object NorthAlley "Alliteration Alley"
           size SIZE_SMALL,
           material MATERIAL_VEGETABLE,
           composition COMPOSED_MALLEABLE,
-      		name 'cashier''s' 'cheque' 'check',
+      		name 'cashier^s' 'cheque' 'check',
           before[;
       			Examine:
       				if (ItemIsNotBlockedByBottle(1) == false) {
@@ -3333,7 +3333,7 @@ Djinn  mySelfobj "(self object)"
       size SIZE_SMALL,
       material MATERIAL_ANIMAL,
       composition COMPOSED_COMPLEX,
-  		name 'conch' 'shell' ' ' ' ',
+  		name 'conch' 'shell' 'shell' 'shell', ! The last two are place holders
   		short_name "conch shell",
       tmp,
       description "The conch shell is shaped like a lumpy rugby ball with bright, iridescent ridges shimmering along the length of its generous aperture.",
