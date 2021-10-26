@@ -1421,7 +1421,7 @@ Object -> t_malicia "Malicia de Monns"
     reference_obj Malicia,
     name 'malicia' 'de' 'monns';
 
-Object -> t_cheque "cashier^s cheque"
+Object -> t_cheque "cashier's cheque"
   with
     reference_obj Cheque,
     name 'cashier^s' 'cheque' 'check';
