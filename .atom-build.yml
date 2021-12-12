@@ -1,0 +1,7 @@
+cmd: ".atom-build.bat"
+sh: true,
+errorMatch:
+  - "(?<file>([a-zA-Z]:.+))\\((?<line>(\\d+))\\): Error: (?<message>(.+))"
+  - "(?<file>([a-zA-Z]:.+))\\((?<line>(\\d+))\\): Fatal error: (?<message>(.+))"
+warningMatch:
+  - "(?<file>([a-zA-Z]:.+))\\((?<line>(\\d+))\\): Warning: (?<message>(.+))"

@@ -1,0 +1,15 @@
+!copyright (c) Joshua Wilson, 2021
+
+Constant Story "Hello, Puny World!";
+
+Constant Headline "^a distillation of Djinn on the Rocks, by Joshua Wilson^";
+
+Release  0;
+
+Include "globals.h";
+Include "puny.h";
+
+[ Initialise;
+	print "This is placeholder code for an update of Djinn on the Rocks to use the latest Puny Inform library and fix issues.^";
+	print "For the source code from the jam version of the game, see dotr-pj1.inf and compile with jam-lib/* added.^";
+];
