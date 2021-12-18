@@ -1,0 +1,3 @@
+Include ">verbs/meta.inf";
+
+Include ">rooms/BroomCloset.inf";

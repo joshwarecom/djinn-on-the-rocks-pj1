@@ -1,0 +1,20 @@
+!copyright (c) Joshua Wilson, 2021
+
+Constant Story      "Djinn on the Rocks";
+Constant Headline   "^...a distilled vintage by Joshua Wilson and many helpful testers.  To list them, type CREDITS^";
+Array UUID_ARRAY static string "UUID://d409fe7d-c342-44cd-b413-c0dba5e7e2fa//";
+Release 3;
+
+Include ">constants.inf";
+Include "globals.h";
+Include "puny.h";
+Include ">includes.inf";
+
+[ Initialise tmp;
+	print "This is placeholder code for an update of Djinn on the Rocks to use the latest Puny Inform library and fix issues.^";
+	print "For the source code from the jam version of the game, see dotr-pj1.inf and compile with jam-lib/* added.^^^";
+
+	tmp = UUID_ARRAY; !suppress compiler warning
+	lookmode = 2;
+	print "^You have a problem and his name is James Merl III.  What are you going to do about it?^";
+];

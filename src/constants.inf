@@ -1,0 +1,49 @@
+!Options for all builds
+Constant STATUSLINE_SCORE; Statusline score;
+Constant OPTIONAL_NO_DARKNESS;
+Constant OPTIONAL_FULL_SCORE;
+Constant OPTIONAL_SIMPLE_DOORS;
+Constant INITIAL_LOCATION_VALUE = BroomCloset;
+
+Constant AMUSING_PROVIDED;
+Constant MAX_SCORE = 28;
+Constant TASKS_PROVIDED;
+Constant NUMBER_TASKS = 28;
+Array task_scores -> 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0;
+
+Constant TASK_HEAR_CONCH = 0;
+Constant TASK_WAKE_CONCH = 1;
+Constant TASK_TALK_TO_CONCH = 2;
+Constant TASK_APPRAISE_SELF = 3;
+Constant TASK_APPRAISE_CONCH = 4;
+Constant TASK_CURSE_SELF = 5;
+Constant TASK_CURSE_CONCH = 6;
+Constant TASK_PUSH_CORK = 23;
+Constant TASK_ESCAPE_BOTTLE = 7;
+Constant TASK_GET_BOTTLE = 8;
+Constant TASK_READ_NOTE = 9;
+Constant TASK_APPRAISE_CLOSET_DOOR = 10;
+Constant TASK_CURSE_CLOSET_DOOR = 11;
+Constant TASK_APPRAISE_JAMES = 12;
+Constant TASK_CURSE_JAMES = 25;
+Constant TASK_SWAPPED_HERRING = 22;
+Constant TASK_INTERACT_PUPPY = 15;
+Constant TASK_CURSE_PUPPY = 16;
+Constant TASK_OBTAIN_PUPPY = 17;
+Constant TASK_APPRAISE_CHILD = 13;
+Constant TASK_CURSE_CHILD = 14;
+Constant TASK_GIVE_PUPPY = 18;
+Constant TASK_APPRAISE_OFFICE_DOOR = 19;
+Constant TASK_CURSE_OFFICE_DOOR = 20;
+Constant TASK_SWAP_DOORS = 21;
+Constant TASK_USE_COMPUTER = 27;
+Constant TASK_ENTRAP_VICTIM = 26;
+Constant TASK_GIVE_RICHNESS_TO_JAMES = 24;
+
+Constant MSG_TAKE_YOURSELF "Unfortunately, you are not yours to take.  You belong to James Merl III.  It's enough to drive a Djinn to gin, eh? Eh? Eh.";
+
+!flags for specific builds
+#IfV3;
+#IfNot;
+Constant OPTIONAL_PROVIDE_UNDO;
+#Endif;

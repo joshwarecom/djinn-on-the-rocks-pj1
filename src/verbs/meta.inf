@@ -1,0 +1,6 @@
+!credits
+[ListCreditsSub;
+  print "Invaluable testing support provided by:^Tiana Wilson, Spartan, Mikrokosmonaut, Dinglehopper, Dave Warner, Darchalus, Cana Wade, and Caleb Robert Wilson^";
+];
+Verb meta 'credits'
+  * -> ListCredits;

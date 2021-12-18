@@ -1,0 +1,5 @@
+Object BroomCloset "Broom Closet"
+	with
+		description "You're in the rather dirty broom closet of The Red Anchor.
+			Various cleaning appliances line the walls. There's a pile of fabric
+			in a corner.";
